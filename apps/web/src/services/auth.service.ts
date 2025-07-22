@@ -39,6 +39,10 @@ export const authService = {
     if (typeof window !== 'undefined') {
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
+      
+      // Also set cookies for server-side authentication checking
+      document.cookie = `accessToken=${data.accessToken}; path=/; max-age=900; SameSite=Lax`; // 15 minutes
+      document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=604800; SameSite=Lax`; // 7 days
     }
   },
 
@@ -46,6 +50,10 @@ export const authService = {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
+      
+      // Also clear cookies
+      document.cookie = 'accessToken=; path=/; max-age=0';
+      document.cookie = 'refreshToken=; path=/; max-age=0';
     }
   },
 

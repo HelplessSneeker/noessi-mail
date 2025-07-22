@@ -45,6 +45,10 @@ apiClient.interceptors.response.use(
 
         localStorage.setItem("accessToken", response.data.accessToken);
         localStorage.setItem("refreshToken", response.data.refreshToken);
+        
+        // Also update cookies
+        document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=900; SameSite=Lax`;
+        document.cookie = `refreshToken=${response.data.refreshToken}; path=/; max-age=604800; SameSite=Lax`;
 
         originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
         return apiClient(originalRequest);
@@ -52,6 +56,8 @@ apiClient.interceptors.response.use(
         // Refresh failed, clear tokens and redirect to home
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
+        document.cookie = 'accessToken=; path=/; max-age=0';
+        document.cookie = 'refreshToken=; path=/; max-age=0';
         window.location.href = "/";
         return Promise.reject(refreshError);
       }
@@ -61,6 +67,8 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && originalRequest.url === "/auth/refresh") {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
+      document.cookie = 'accessToken=; path=/; max-age=0';
+      document.cookie = 'refreshToken=; path=/; max-age=0';
       window.location.href = "/";
     }
 
