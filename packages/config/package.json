@@ -1,0 +1,10 @@
+{
+  "name": "@noessi/config",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./index.js",
+  "files": [
+    "eslint-preset.js",
+    "tailwind.config.js"
+  ]
+}

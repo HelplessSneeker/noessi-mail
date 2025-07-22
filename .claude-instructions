@@ -1,0 +1,40 @@
+# Claude Code Instructions for Noessi Mail
+
+## When Working on This Project:
+
+1. **Always check current branch and status first**
+   - Run `git status` before making changes
+   - Create feature branches for new work
+
+2. **Follow the established patterns**
+   - Backend: NestJS modules with service/controller separation
+   - Frontend: App Router with server/client components
+   - Use existing auth patterns for new protected routes
+
+3. **Database changes**
+   - Modify schema in `packages/database/prisma/schema.prisma`
+   - Run `pnpm db:push` for development
+   - Create migrations with `pnpm db:migrate` for production
+
+4. **Adding new packages**
+   - Install in specific workspace: `pnpm add <package> --filter @noessi/web`
+   - Share types through `@noessi/types` package
+   - Update exports in package index files
+
+5. **Common issues to watch for**
+   - CORS errors: Check API URL in frontend
+   - Module not found: Run `pnpm install` from root
+   - Prisma errors: Regenerate client with `pnpm db:generate`
+   - Port conflicts: Check docker-compose services
+
+6. **Testing changes**
+   - Frontend: http://localhost:3000
+   - Backend: http://localhost:3001
+   - Database: Use Prisma Studio `pnpm db:studio`
+
+## Email Implementation Notes:
+- Use `imapflow` for IMAP connections
+- Use `nodemailer` for SMTP
+- Store email credentials encrypted in database
+- Implement connection pooling for IMAP
+- Parse emails with `mailparser`
