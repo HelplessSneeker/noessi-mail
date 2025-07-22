@@ -28,6 +28,7 @@ noessi-mail/
 - **Validation**: Class-validator and class-transformer
 - **Password Hashing**: bcrypt
 - **UI Components**: Radix UI primitives with custom styling
+- **Internationalization**: next-intl with browser language detection
 
 ## Common Commands
 ```bash
@@ -73,6 +74,8 @@ Located in `.env` at root:
 ✅ Winston logging system with request/response interceptors
 ✅ Global exception filters for error handling
 ✅ UI component library with Radix UI primitives
+✅ Internationalization (i18n) with English and German support
+✅ Dashboard with email folder sidebar
 ⏳ Email account integration (OAuth2)
 ⏳ IMAP/SMTP functionality
 ⏳ Email UI components (inbox, compose, etc.)
@@ -102,6 +105,36 @@ Located in `.env` at root:
 - E2E tests for critical user flows
 - Mock external services (IMAP/SMTP)
 
+## Internationalization (i18n)
+The application supports multiple languages using next-intl:
+
+### Supported Languages
+- **English (en)**: Default language
+- **German (de)**: Full translation support
+
+### Implementation Details
+- **Library**: next-intl for React component translations
+- **Language Detection**: Automatic browser language detection via Accept-Language header
+- **Message Files**: JSON files in `/apps/web/messages/` directory
+- **Components**: All UI components use translation hooks (`useTranslations`)
+- **Fallback**: English is used as fallback for unsupported languages
+
+### Translation Files
+- `/apps/web/messages/en.json` - English translations
+- `/apps/web/messages/de.json` - German translations
+
+### Usage in Components
+```typescript
+import { useTranslations } from 'next-intl';
+
+const t = useTranslations('dashboard');
+const title = t('title'); // Returns translated title
+```
+
+### Future Language Support
+- Language switcher component is available (`LanguageSwitcher`) for manual language selection
+- Additional languages can be added by creating new message files and updating locale configuration
+
 ## Architecture Decisions
 1. **Monorepo**: Shared code between frontend/backend using PNPM workspaces
 2. **JWT Refresh**: Security with good UX using access/refresh token rotation
@@ -111,6 +144,7 @@ Located in `.env` at root:
 6. **Turborepo**: Optimized monorepo builds and caching
 7. **Radix UI**: Accessible, unstyled components with custom styling
 8. **Winston**: Structured logging in NestJS backend
+9. **next-intl**: Browser-based language detection for seamless i18n experience
 
 ## Current Tasks
 1. Implement email account connection (OAuth2)
@@ -126,5 +160,10 @@ Located in `.env` at root:
 - `/apps/web/src/services/auth.service.ts` - Frontend auth service
 - `/apps/web/src/lib/api-client.ts` - Axios API client configuration
 - `/packages/database/prisma/schema.prisma` - Database schema
-- `/apps/web/src/app/dashboard/page.tsx` - Protected route example
-- `/apps/web/src/components/ui/` - Reusable UI components
+- `/apps/web/src/app/dashboard/page.tsx` - Dashboard with sidebar and i18n integration
+- `/apps/web/src/components/ui/` - Reusable UI components with i18n support
+- `/apps/web/src/components/ui/sidebar.tsx` - Email folder navigation sidebar
+- `/apps/web/src/components/ui/language-switcher.tsx` - Language selection component (available for future use)
+- `/apps/web/messages/` - Translation files for i18n support
+- `/apps/web/src/i18n/request.ts` - Next-intl server configuration
+- `/apps/web/src/lib/i18n.ts` - i18n utility functions and types

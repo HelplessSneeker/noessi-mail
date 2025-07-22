@@ -3,12 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { authService } from '@/services/auth.service';
 import { Navbar } from '@/components/ui/navbar';
 import { Sidebar } from '@/components/ui/sidebar';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const t = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
   const [isMounted, setIsMounted] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState('inbox');
   
@@ -43,7 +46,7 @@ export default function DashboardPage() {
   if (!isMounted || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
+        <p>{tCommon('loading')}</p>
       </div>
     );
   }
@@ -88,18 +91,18 @@ export default function DashboardPage() {
         <div className="flex-1 flex flex-col items-center justify-center p-24">
           <div className="w-full max-w-2xl space-y-8">
             <div className="text-center">
-              <h1 className="text-3xl font-bold">Dashboard</h1>
-              <p className="mt-2 text-gray-600">Selected folder: {selectedFolder}</p>
+              <h1 className="text-3xl font-bold">{t('title')}</h1>
+              <p className="mt-2 text-gray-600">{t('selectedFolder', { folder: selectedFolder })}</p>
             </div>
             
             <div className="rounded-lg border p-6 space-y-4">
-              <h2 className="text-xl font-semibold">User Information</h2>
+              <h2 className="text-xl font-semibold">{t('userInformation')}</h2>
               <div className="space-y-2">
-                <p><strong>ID:</strong> {user.id}</p>
-                <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>Name:</strong> {user.name || 'Not set'}</p>
-                <p><strong>Email Verified:</strong> {user.isEmailVerified ? 'Yes' : 'No'}</p>
-                <p><strong>Member Since:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
+                <p><strong>{t('userId')}:</strong> {user.id}</p>
+                <p><strong>{t('userEmail')}:</strong> {user.email}</p>
+                <p><strong>{t('userName')}:</strong> {user.name || t('nameNotSet')}</p>
+                <p><strong>{t('emailVerified')}:</strong> {user.isEmailVerified ? t('yes') : t('no')}</p>
+                <p><strong>{t('memberSince')}:</strong> {new Date(user.createdAt).toLocaleDateString()}</p>
               </div>
             </div>
           </div>

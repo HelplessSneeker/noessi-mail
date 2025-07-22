@@ -1,6 +1,7 @@
 'use client';
 
 import { LogOut, Settings, RefreshCw, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Button } from './button';
 
 interface NavbarProps {
@@ -18,6 +19,8 @@ export function Navbar({
   onUserSettings, 
   isLoading = false 
 }: NavbarProps) {
+  const t = useTranslations('common');
+  const tNav = useTranslations('navigation');
   return (
     <nav className="border-b border-gray-200 bg-white shadow-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -33,7 +36,7 @@ export function Navbar({
               onClick={onRefresh}
               disabled={isLoading}
               className="h-9 w-9 p-0"
-              title="Refresh"
+              title={t('refresh')}
             >
               <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
@@ -43,7 +46,7 @@ export function Navbar({
               size="sm"
               onClick={onUserSettings}
               className="h-9 w-9 p-0"
-              title="User Settings"
+              title={tNav('userSettings')}
             >
               <User className="h-4 w-4" />
             </Button>
@@ -53,7 +56,7 @@ export function Navbar({
               size="sm"
               onClick={onSettings}
               className="h-9 w-9 p-0"
-              title="Settings"
+              title={t('settings')}
             >
               <Settings className="h-4 w-4" />
             </Button>
@@ -63,7 +66,7 @@ export function Navbar({
               size="sm"
               onClick={onLogout}
               className="h-9 w-9 p-0"
-              title="Logout"
+              title={t('logout')}
             >
               <LogOut className="h-4 w-4" />
             </Button>

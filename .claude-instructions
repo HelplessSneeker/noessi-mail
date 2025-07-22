@@ -32,6 +32,14 @@
    - Backend: http://localhost:3001
    - Database: Use Prisma Studio `pnpm db:studio`
 
+7. **Internationalization (i18n)**
+   - Uses `next-intl` for translations
+   - Automatic browser language detection (English/German)
+   - Translation files in `/apps/web/messages/` (en.json, de.json)
+   - Use `useTranslations('section')` hook in components
+   - `LanguageSwitcher` component available for future manual selection
+   - All static strings must be translated in both languages
+
 ## Email Implementation Notes:
 - Use `imapflow` for IMAP connections
 - Use `nodemailer` for SMTP
