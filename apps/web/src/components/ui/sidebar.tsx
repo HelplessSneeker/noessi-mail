@@ -20,6 +20,7 @@ interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   ({ className, selectedFolder, onFolderSelect, ...props }, ref) => {
     const t = useTranslations('sidebar');
+    const tEmail = useTranslations('email');
     
     const folders: EmailFolder[] = [
       {
@@ -69,26 +70,36 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
         )}
         {...props}
       >
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">{t('mail')}</h2>
         </div>
         
         <nav className="flex-1 p-4">
-          <ul className="space-y-2">
+          <ul className="space-y-1">
             {folders.map((folder) => (
               <li key={folder.id}>
                 <Button
-                  variant={selectedFolder === folder.id ? "secondary" : "ghost"}
+                  variant="ghost"
                   className={cn(
-                    "w-full justify-start h-10 px-3",
-                    selectedFolder === folder.id && "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                    "w-full justify-start h-11 px-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors",
+                    selectedFolder === folder.id && "bg-blue-50 text-blue-700 hover:bg-blue-100 border-r-2 border-blue-500"
                   )}
                   onClick={() => onFolderSelect?.(folder.id)}
                 >
-                  <span className="mr-3">{folder.icon}</span>
-                  <span className="flex-1 text-left">{folder.name}</span>
+                  <span className={cn(
+                    "mr-3 flex-shrink-0",
+                    selectedFolder === folder.id ? "text-blue-600" : "text-gray-500"
+                  )}>
+                    {folder.icon}
+                  </span>
+                  <span className="flex-1 text-left font-medium">{folder.name}</span>
                   {folder.count !== undefined && (
-                    <span className="ml-auto text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                    <span className={cn(
+                      "ml-auto text-xs px-2 py-1 rounded-full font-medium",
+                      selectedFolder === folder.id 
+                        ? "bg-blue-100 text-blue-700" 
+                        : "bg-gray-100 text-gray-600"
+                    )}>
                       {folder.count}
                     </span>
                   )}
@@ -97,6 +108,19 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
             ))}
           </ul>
         </nav>
+        
+        {/* Quick Actions */}
+        <div className="p-4 border-t border-gray-200">
+          <Button
+            variant="outline"
+            className="w-full justify-start h-10 px-3 text-sm font-medium text-gray-700 hover:text-gray-900"
+          >
+            <svg className="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+{tEmail('compose')}
+          </Button>
+        </div>
       </div>
     )
   }
