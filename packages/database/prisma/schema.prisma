@@ -18,6 +18,7 @@ model User {
   
   refreshTokens   RefreshToken[]
   emailAccounts   EmailAccount[]
+  emails          Email[]
 
   @@map("users")
 }
@@ -49,4 +50,46 @@ model EmailAccount {
   @@unique([email, userId])
   @@index([userId])
   @@map("email_accounts")
+}
+
+model Email {
+  id              String    @id @default(cuid())
+  messageId       String    @unique // RFC 2822 Message-ID
+  subject         String?
+  body            String?   @db.Text
+  bodyHtml        String?   @db.Text
+  fromAddress     String
+  fromName        String?
+  toAddresses     String[]  // JSON array of email addresses
+  ccAddresses     String[]  @default([])
+  bccAddresses    String[]  @default([])
+  isRead          Boolean   @default(false)
+  isStarred       Boolean   @default(false)
+  isImportant     Boolean   @default(false)
+  isArchived      Boolean   @default(false)
+  isDeleted       Boolean   @default(false)
+  isDraft         Boolean   @default(false)
+  sentAt          DateTime?
+  receivedAt      DateTime
+  folderName      String?   // INBOX, SENT, DRAFTS, etc
+  threadId        String?   // For email threading
+  inReplyTo       String?   // Message-ID of parent email
+  references      String[]  @default([]) // Message-IDs for threading
+  attachments     Json?     // JSON array of attachment metadata
+  size            Int?      // Email size in bytes
+  labels          String[]  @default([]) // Custom labels/tags
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailAccountId  String?   // Which account this email belongs to
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([messageId])
+  @@index([threadId])
+  @@index([sentAt])
+  @@index([receivedAt])
+  @@index([isRead])
+  @@index([folderName])
+  @@map("emails")
 }
