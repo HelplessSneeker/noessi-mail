@@ -20,11 +20,14 @@ noessi-mail/
 ```
 
 ## Key Technologies
-- **Frontend**: Next.js 14 (App Router), React Query, Tailwind CSS, ShadCN UI
-- **Backend**: NestJS, Passport JWT, Prisma ORM
+- **Frontend**: Next.js 14 (App Router), React Query (TanStack Query), Tailwind CSS, Radix UI
+- **Backend**: NestJS, Passport JWT, Prisma ORM, Winston logging
 - **Database**: PostgreSQL with Prisma
 - **Monorepo**: Turborepo with PNPM workspaces
 - **Auth**: JWT with refresh token rotation
+- **Validation**: Class-validator and class-transformer
+- **Password Hashing**: bcrypt
+- **UI Components**: Radix UI primitives with custom styling
 
 ## Common Commands
 ```bash
@@ -32,12 +35,12 @@ noessi-mail/
 pnpm dev              # Start all apps
 pnpm build            # Build all apps
 pnpm lint             # Lint all apps
+pnpm format           # Format code with Prettier
 
 # Database
 pnpm db:push          # Push schema changes
 pnpm db:migrate       # Create migration
 pnpm db:studio        # Open Prisma Studio
-pnpm db:generate      # Generate Prisma client
 
 # Docker
 docker-compose up -d  # Start services
@@ -50,15 +53,29 @@ Located in `.env` at root:
 - DATABASE_URL: PostgreSQL connection
 - JWT_ACCESS_SECRET: Access token secret
 - JWT_REFRESH_SECRET: Refresh token secret
+- JWT_ACCESS_EXPIRES_IN: Access token expiration (15m)
+- JWT_REFRESH_EXPIRES_IN: Refresh token expiration (7d)
 - NEXT_PUBLIC_API_URL: Backend URL for frontend
+- API_PORT: Backend server port (3001)
+
+## Workspace Structure
+- **@noessi/api**: NestJS backend application
+- **@noessi/web**: Next.js frontend application  
+- **@noessi/database**: Prisma schema and client
+- **@noessi/types**: Shared TypeScript type definitions
+- **@noessi/config**: Shared ESLint and Tailwind configurations
 
 ## Current Implementation Status
 ✅ Authentication (register, login, logout, refresh)
-✅ Protected routes
-✅ User management
-⏳ Email account integration
+✅ Protected routes with JWT guards
+✅ User management with bcrypt password hashing
+✅ Database schema with User, RefreshToken, EmailAccount models
+✅ Winston logging system with request/response interceptors
+✅ Global exception filters for error handling
+✅ UI component library with Radix UI primitives
+⏳ Email account integration (OAuth2)
 ⏳ IMAP/SMTP functionality
-⏳ Email UI components
+⏳ Email UI components (inbox, compose, etc.)
 
 ## API Endpoints
 - POST /auth/register - User registration
@@ -68,9 +85,9 @@ Located in `.env` at root:
 - POST /auth/me - Get current user (protected)
 
 ## Database Schema
-- User: id, email, password, name, isEmailVerified
-- RefreshToken: token storage with expiry
-- EmailAccount: OAuth tokens for email providers (planned)
+- **User**: id, email, password, name, isEmailVerified, timestamps, relations to RefreshToken and EmailAccount
+- **RefreshToken**: token storage with expiry and user relation
+- **EmailAccount**: OAuth tokens for email providers with provider info, access/refresh tokens, and expiry
 
 ## Code Style
 - TypeScript strict mode
@@ -86,11 +103,14 @@ Located in `.env` at root:
 - Mock external services (IMAP/SMTP)
 
 ## Architecture Decisions
-1. **Monorepo**: Shared code between frontend/backend
-2. **JWT Refresh**: Security with good UX
-3. **Prisma**: Type-safe database access
-4. **React Query**: Efficient server state management
-5. **Docker**: Consistent dev environment
+1. **Monorepo**: Shared code between frontend/backend using PNPM workspaces
+2. **JWT Refresh**: Security with good UX using access/refresh token rotation
+3. **Prisma**: Type-safe database access with PostgreSQL
+4. **TanStack Query**: Efficient server state management (formerly React Query)
+5. **Docker**: Consistent dev environment for PostgreSQL
+6. **Turborepo**: Optimized monorepo builds and caching
+7. **Radix UI**: Accessible, unstyled components with custom styling
+8. **Winston**: Structured logging in NestJS backend
 
 ## Current Tasks
 1. Implement email account connection (OAuth2)
@@ -100,7 +120,11 @@ Located in `.env` at root:
 5. Implement email composer
 
 ## Important Files
-- `/apps/api/src/auth/` - Authentication logic
-- `/apps/web/src/services/auth.service.ts` - Frontend auth
+- `/apps/api/src/auth/` - Authentication logic with controllers, services, guards, strategies
+- `/apps/api/src/logging/` - Winston logging configuration
+- `/apps/api/src/filters/` - Global exception filters
+- `/apps/web/src/services/auth.service.ts` - Frontend auth service
+- `/apps/web/src/lib/api-client.ts` - Axios API client configuration
 - `/packages/database/prisma/schema.prisma` - Database schema
 - `/apps/web/src/app/dashboard/page.tsx` - Protected route example
+- `/apps/web/src/components/ui/` - Reusable UI components
