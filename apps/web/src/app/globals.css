@@ -4,47 +4,63 @@
 
 @layer base {
   :root {
+    /* Light Theme - Noessi Mail Blue Theme */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --primary: 217 91% 60%;        /* Brand blue-600 equivalent */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 91% 95%;      /* Light blue background */
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 214 32% 91%;          /* Subtle blue-gray */
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 217 91% 95%;         /* Light blue accent */
+    --accent-foreground: 217 91% 60%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 217 91% 60%;           /* Focus ring in brand blue */
     --radius: 0.5rem;
+    
+    /* Custom Noessi Mail Brand Variables */
+    --brand-primary: 217 91% 60%;    /* blue-600 */
+    --brand-primary-dark: 213 94% 68%; /* blue-700 */
+    --brand-secondary: 221 83% 53%;   /* blue-500 */
+    --brand-light: 217 91% 95%;      /* blue-50 */
+    --brand-muted: 214 32% 91%;      /* blue-100 */
   }
 
   .dark {
+    /* Dark Theme - Noessi Mail Blue Theme */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    --primary: 217 91% 70%;         /* Lighter blue for dark theme */
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 215 28% 17%;       /* Dark blue-gray */
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 215 28% 17%;
+    --accent-foreground: 217 91% 70%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 217 91% 70%;
+    
+    /* Custom Noessi Mail Brand Variables - Dark Theme */
+    --brand-primary: 217 91% 70%;     /* Lighter blue for dark */
+    --brand-primary-dark: 221 83% 53%; /* blue-500 for dark */
+    --brand-secondary: 217 91% 60%;   /* blue-600 for dark */
+    --brand-light: 215 28% 17%;       /* Dark blue background */
+    --brand-muted: 217.2 32.6% 17.5%; /* Dark muted */
   }
 }
