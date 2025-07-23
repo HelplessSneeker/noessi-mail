@@ -29,6 +29,7 @@ noessi-mail/
 - **Password Hashing**: bcrypt
 - **UI Components**: Radix UI primitives with custom styling
 - **Internationalization**: next-intl with browser language detection
+- **Mock Data System**: Comprehensive email simulation for development
 
 ## Common Commands
 ```bash
@@ -76,9 +77,16 @@ Located in `.env` at root:
 ✅ UI component library with Radix UI primitives
 ✅ Internationalization (i18n) with English and German support
 ✅ Dashboard with email folder sidebar
+✅ Full email interface with three-panel layout (sidebar, email list, email viewer)
+✅ Email selection functionality with highlighting and visual states
+✅ Mock email data system for different folders (inbox, sent, spam, deleted)
+✅ Complete email display with attachments, priority indicators, and actions
+✅ Email list with unread counts, filtering, and action buttons
+✅ Route protection middleware with authentication-based redirects
 ⏳ Email account integration (OAuth2)
 ⏳ IMAP/SMTP functionality
-⏳ Email UI components (inbox, compose, etc.)
+⏳ Email composer implementation
+⏳ Real email fetching and sending
 
 ## API Endpoints
 - POST /auth/register - User registration
@@ -147,11 +155,13 @@ const title = t('title'); // Returns translated title
 9. **next-intl**: Browser-based language detection for seamless i18n experience
 
 ## Current Tasks
-1. Implement email account connection (OAuth2)
-2. Create IMAP service for fetching emails
-3. Design email list and viewer components
-4. Add email search functionality
-5. Implement email composer
+1. Implement email composer with rich text editing
+2. Implement email account connection (OAuth2)
+3. Create IMAP service for fetching emails
+4. Replace mock data with real email integration
+5. Add email search and filtering functionality
+6. Implement email actions (mark as read/unread, delete, star)
+7. Add drag-and-drop email organization
 
 ## Important Files
 - `/apps/api/src/auth/` - Authentication logic with controllers, services, guards, strategies
@@ -160,10 +170,15 @@ const title = t('title'); // Returns translated title
 - `/apps/web/src/services/auth.service.ts` - Frontend auth service
 - `/apps/web/src/lib/api-client.ts` - Axios API client configuration
 - `/packages/database/prisma/schema.prisma` - Database schema
-- `/apps/web/src/app/dashboard/page.tsx` - Dashboard with sidebar and i18n integration
+- `/apps/web/src/app/dashboard/page.tsx` - Dashboard with three-panel email interface
 - `/apps/web/src/components/ui/` - Reusable UI components with i18n support
 - `/apps/web/src/components/ui/sidebar.tsx` - Email folder navigation sidebar
+- `/apps/web/src/components/ui/email-list.tsx` - Email list component with folder filtering
+- `/apps/web/src/components/ui/email-viewer.tsx` - Full email display component
+- `/apps/web/src/components/ui/email-item.tsx` - Individual email item with selection states
+- `/apps/web/src/lib/mock-emails.ts` - Mock email data system for development
 - `/apps/web/src/components/ui/language-switcher.tsx` - Language selection component (available for future use)
 - `/apps/web/messages/` - Translation files for i18n support
 - `/apps/web/src/i18n/request.ts` - Next-intl server configuration
 - `/apps/web/src/lib/i18n.ts` - i18n utility functions and types
+- `/apps/web/src/middleware.ts` - Route protection middleware
