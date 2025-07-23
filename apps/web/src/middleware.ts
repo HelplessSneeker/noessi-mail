@@ -34,7 +34,7 @@ export function middleware(request: NextRequest) {
     }
     
     // Check if route exists by trying common app routes
-    const validRoutes = ['/', '/login', '/register', '/dashboard'];
+    const validRoutes = ['/', '/login', '/register', '/dashboard', '/settings'];
     
     // If it's not a known valid route, redirect to dashboard
     if (!validRoutes.includes(pathname)) {
@@ -53,7 +53,7 @@ export function middleware(request: NextRequest) {
     }
     
     // Check if route exists by trying common app routes
-    const validRoutes = ['/', '/login', '/register', '/dashboard'];
+    const validRoutes = ['/', '/login', '/register', '/dashboard', '/settings'];
     
     // If it's not a known valid route, redirect to home
     if (!validRoutes.includes(pathname)) {

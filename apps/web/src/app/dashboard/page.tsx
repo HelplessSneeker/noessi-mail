@@ -65,7 +65,7 @@ export default function DashboardPage() {
   };
 
   const handleSettings = () => {
-    console.log('Settings clicked');
+    router.push('/settings');
   };
 
   const handleUserSettings = () => {

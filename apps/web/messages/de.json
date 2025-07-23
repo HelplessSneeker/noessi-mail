@@ -105,5 +105,22 @@
     "english": "Englisch",
     "german": "Deutsch",
     "selectLanguage": "Sprache auswählen"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "emailAccounts": "E-Mail-Konten",
+    "emailAccountsDescription": "Verwalten Sie Ihre verbundenen E-Mail-Konten",
+    "addAccount": "Konto hinzufügen",
+    "emailAddress": "E-Mail-Adresse",
+    "provider": "Anbieter",
+    "emailPlaceholder": "E-Mail-Adresse eingeben",
+    "connected": "Verbunden",
+    "noEmailAccounts": "Keine E-Mail-Konten",
+    "addFirstAccount": "Fügen Sie Ihr erstes E-Mail-Konto hinzu, um zu beginnen",
+    "confirmDelete": "Sind Sie sicher, dass Sie dieses E-Mail-Konto entfernen möchten?",
+    "emailRequired": "E-Mail-Adresse ist erforderlich",
+    "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+    "providerRequired": "Anbieter ist erforderlich",
+    "emailAlreadyExists": "Dieses E-Mail-Konto existiert bereits"
   }
 }

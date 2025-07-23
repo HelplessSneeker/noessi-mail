@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggingModule, LoggingInterceptor } from './logging';
 import { GlobalExceptionFilter } from './filters/global-exception.filter';
+import { EmailAccountModule } from './email-account/email-account.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { GlobalExceptionFilter } from './filters/global-exception.filter';
     LoggingModule,
     PrismaModule,
     AuthModule,
+    EmailAccountModule,
   ],
   providers: [
     {

@@ -105,5 +105,22 @@
     "english": "English",
     "german": "German",
     "selectLanguage": "Select Language"
+  },
+  "settings": {
+    "title": "Settings",
+    "emailAccounts": "Email Accounts",
+    "emailAccountsDescription": "Manage your connected email accounts",
+    "addAccount": "Add Account",
+    "emailAddress": "Email Address",
+    "provider": "Provider",
+    "emailPlaceholder": "Enter your email address",
+    "connected": "Connected",
+    "noEmailAccounts": "No email accounts",
+    "addFirstAccount": "Add your first email account to get started",
+    "confirmDelete": "Are you sure you want to remove this email account?",
+    "emailRequired": "Email address is required",
+    "invalidEmail": "Please enter a valid email address",
+    "providerRequired": "Provider is required",
+    "emailAlreadyExists": "This email account already exists"
   }
 }
