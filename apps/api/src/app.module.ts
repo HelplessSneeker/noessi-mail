@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { LoggingModule, LoggingInterceptor } from './logging';
 import { GlobalExceptionFilter } from './filters/global-exception.filter';
 import { EmailAccountModule } from './email-account/email-account.module';
+import { EncryptionModule } from './encryption/encryption.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { EmailAccountModule } from './email-account/email-account.module';
       isGlobal: true,
       envFilePath: '../../.env',
     }),
+    EncryptionModule,
     LoggingModule,
     PrismaModule,
     AuthModule,

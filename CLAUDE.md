@@ -27,6 +27,7 @@ noessi-mail/
 - **Auth**: JWT with refresh token rotation
 - **Validation**: Class-validator and class-transformer
 - **Password Hashing**: bcrypt
+- **Data Encryption**: Application-Level Encryption (ALE) for all sensitive user data
 - **UI Components**: Radix UI primitives with custom styling
 - **Internationalization**: next-intl with browser language detection
 - **Mock Data System**: Comprehensive email simulation for development
@@ -57,6 +58,7 @@ Located in `.env` at root:
 - JWT_REFRESH_SECRET: Refresh token secret
 - JWT_ACCESS_EXPIRES_IN: Access token expiration (15m)
 - JWT_REFRESH_EXPIRES_IN: Refresh token expiration (7d)
+- ENCRYPTION_KEY: Application-level encryption key (32-byte hex string)
 - NEXT_PUBLIC_API_URL: Backend URL for frontend
 - API_PORT: Backend server port (3001)
 
@@ -83,6 +85,8 @@ Located in `.env` at root:
 ✅ Complete email display with attachments, priority indicators, and actions
 ✅ Email list with unread counts, filtering, and action buttons
 ✅ Route protection middleware with authentication-based redirects
+✅ Settings page with EmailAccount management and CRUD operations
+⏳ Application-Level Encryption implementation for sensitive data
 ⏳ Email account integration (OAuth2)
 ⏳ IMAP/SMTP functionality
 ⏳ Email composer implementation
@@ -94,11 +98,37 @@ Located in `.env` at root:
 - POST /auth/logout - User logout
 - POST /auth/refresh - Refresh tokens
 - POST /auth/me - Get current user (protected)
+- GET /email-accounts - Get user's email accounts (protected)
+- POST /email-accounts - Create email account (protected)
+- PATCH /email-accounts/:id - Update email account (protected)
+- DELETE /email-accounts/:id - Delete email account (protected)
 
 ## Database Schema
 - **User**: id, email, password, name, isEmailVerified, timestamps, relations to RefreshToken and EmailAccount
 - **RefreshToken**: token storage with expiry and user relation
 - **EmailAccount**: OAuth tokens for email providers with provider info, access/refresh tokens, and expiry
+- **Email**: Complete email storage with threading, attachments, and metadata
+
+## Data Security & Encryption
+All sensitive user data is protected using **Application-Level Encryption (ALE)**:
+
+### Encrypted Fields
+- **User**: `email`, `name` (passwords are hashed with bcrypt, not encrypted)
+- **EmailAccount**: `email`, `accessToken`, `refreshToken`
+- **Email**: `subject`, `body`, `bodyHtml`, `fromAddress`, `fromName`, `toAddresses`, `ccAddresses`, `bccAddresses`, `attachments`
+
+### Encryption Implementation
+- **Algorithm**: AES-256-GCM for authenticated encryption
+- **Key Management**: Single application-wide encryption key stored in environment variables
+- **Transparency**: Encryption/decryption is transparent to application logic via Prisma middleware
+- **Performance**: Minimal impact with efficient bulk operations
+- **Security**: Protects against database breaches and insider threats
+
+### Encryption Service
+- **Location**: `/apps/api/src/encryption/` - Centralized encryption service
+- **Methods**: `encrypt(plaintext)`, `decrypt(ciphertext)`, `encryptObject()`, `decryptObject()`
+- **Integration**: Automatic via Prisma middleware for specified fields
+- **Error Handling**: Graceful fallback and logging for encryption/decryption failures
 
 ## Code Style
 - TypeScript strict mode
@@ -153,21 +183,27 @@ const title = t('title'); // Returns translated title
 7. **Radix UI**: Accessible, unstyled components with custom styling
 8. **Winston**: Structured logging in NestJS backend
 9. **next-intl**: Browser-based language detection for seamless i18n experience
+10. **Application-Level Encryption**: AES-256-GCM encryption for all sensitive user data
 
 ## Current Tasks
-1. Implement email composer with rich text editing
-2. Implement email account connection (OAuth2)
-3. Create IMAP service for fetching emails
-4. Replace mock data with real email integration
-5. Add email search and filtering functionality
-6. Implement email actions (mark as read/unread, delete, star)
-7. Add drag-and-drop email organization
+1. **HIGH PRIORITY**: Implement Application-Level Encryption (ALE) for all sensitive user data
+2. Implement email composer with rich text editing
+3. Implement email account connection (OAuth2)
+4. Create IMAP service for fetching emails
+5. Replace mock data with real email integration
+6. Add email search and filtering functionality
+7. Implement email actions (mark as read/unread, delete, star)
+8. Add drag-and-drop email organization
 
 ## Important Files
 - `/apps/api/src/auth/` - Authentication logic with controllers, services, guards, strategies
+- `/apps/api/src/encryption/` - Application-Level Encryption service and middleware
+- `/apps/api/src/email-account/` - EmailAccount CRUD operations and management
 - `/apps/api/src/logging/` - Winston logging configuration
 - `/apps/api/src/filters/` - Global exception filters
 - `/apps/web/src/services/auth.service.ts` - Frontend auth service
+- `/apps/web/src/services/email-account.service.ts` - Frontend email account service
+- `/apps/web/src/app/settings/page.tsx` - Settings page with EmailAccount management
 - `/apps/web/src/lib/api-client.ts` - Axios API client configuration
 - `/packages/database/prisma/schema.prisma` - Database schema
 - `/apps/web/src/app/dashboard/page.tsx` - Dashboard with three-panel email interface
