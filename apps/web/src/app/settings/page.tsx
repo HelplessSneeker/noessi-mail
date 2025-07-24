@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { authService } from '@/services/auth.service';
 import { emailAccountService } from '@/services/email-account.service';
 import { Button } from '@/components/ui/button';
+import { Navbar } from '@/components/ui/navbar';
 import { ArrowLeft, Plus, Trash2, Settings as SettingsIcon } from 'lucide-react';
 
 export default function SettingsPage() {
@@ -271,56 +272,70 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
+    <div className="flex min-h-screen flex-col">
+      {/* Navbar */}
+      <Navbar
+        onLogout={() => {
+          authService.logout();
+          router.push('/login');
+        }}
+        onSettings={() => router.push('/settings')}
+        onRefresh={() => window.location.reload()}
+        onUserSettings={() => console.log('User settings')}
+      />
+
+      {/* Main Content */}
+      <div className="flex-1 bg-gray-50 p-3 sm:p-6 overflow-y-auto">
+        <div className="h-full max-w-4xl mx-auto">
+          {/* Header Section */}
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center mb-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => router.back()}
-                className="mr-4"
+                className="mr-4 hover:bg-blue-50 hover:text-blue-600 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {tCommon('back')}
               </Button>
-              <div className="flex items-center">
-                <SettingsIcon className="h-6 w-6 text-gray-500 mr-3" />
-                <h1 className="text-xl font-semibold text-gray-900">{t('title')}</h1>
-              </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Email Accounts Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 sm:gap-4 mb-2">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors">
+                <SettingsIcon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+              </div>
               <div>
-                <h2 className="text-lg font-medium text-gray-900">{t('emailAccounts')}</h2>
-                <p className="text-sm text-gray-600">{t('emailAccountsDescription')}</p>
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">{t('title')}</h1>
+                <p className="text-sm text-gray-600">Manage your application preferences</p>
               </div>
-              <Button
-                onClick={() => setIsAddingAccount(true)}
-                disabled={isAddingAccount}
-                className="flex items-center"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {t('addAccount')}
-              </Button>
             </div>
           </div>
+
+          <div className="grid gap-4 sm:gap-6">
+            {/* Email Accounts Section */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden card-hover">
+              <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-base sm:text-lg font-medium text-gray-900">{t('emailAccounts')}</h2>
+                    <p className="text-xs sm:text-sm text-gray-600">{t('emailAccountsDescription')}</p>
+                  </div>
+                  <Button
+                    onClick={() => setIsAddingAccount(true)}
+                    disabled={isAddingAccount}
+                    className="flex items-center transition-colors"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    {t('addAccount')}
+                  </Button>
+                </div>
+              </div>
 
           <div className="divide-y divide-gray-200">
-            {/* Add Account Form */}
-            {isAddingAccount && (
-              <div className="px-6 py-4 bg-gray-50">
-                <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Add Account Form */}
+              {isAddingAccount && (
+                <div className="px-4 sm:px-6 py-4 bg-gray-50">
+                  <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                   {/* Provider Selection */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -582,54 +597,56 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {/* Email Accounts List */}
-            {emailAccounts.length === 0 && !isAddingAccount ? (
-              <div className="px-6 py-8 text-center">
-                <div className="w-12 h-12 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <SettingsIcon className="h-6 w-6 text-gray-400" />
+              {/* Email Accounts List */}
+              {emailAccounts.length === 0 && !isAddingAccount ? (
+                <div className="px-4 sm:px-6 py-8 text-center">
+                  <div className="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 hover:bg-blue-200 transition-colors">
+                    <SettingsIcon className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h3 className="text-sm font-medium text-gray-900 mb-1">{t('noEmailAccounts')}</h3>
+                  <p className="text-sm text-gray-500">{t('addFirstAccount')}</p>
                 </div>
-                <h3 className="text-sm font-medium text-gray-900 mb-1">{t('noEmailAccounts')}</h3>
-                <p className="text-sm text-gray-500">{t('addFirstAccount')}</p>
-              </div>
-            ) : (
-              emailAccounts.map((account) => (
-                <div key={account.id} className="px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-blue-600">
-                            {account.email.charAt(0).toUpperCase()}
-                          </span>
+              ) : (
+                emailAccounts.map((account) => (
+                  <div key={account.id} className="px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3 sm:space-x-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors">
+                            <span className="text-sm font-medium text-blue-600">
+                              {account.email.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-medium text-gray-900">{account.email}</h3>
+                          <p className="text-xs sm:text-sm text-gray-500 capitalize">{account.provider}</p>
                         </div>
                       </div>
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-900">{account.email}</h3>
-                        <p className="text-sm text-gray-500 capitalize">{account.provider}</p>
+                      <div className="flex items-center space-x-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {t('connected')}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteAccount(account.id)}
+                          disabled={deleteAccountMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        {t('connected')}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteAccount(account.id)}
-                        disabled={deleteAccountMutation.isPending}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+          </div>
+            </div>
+
+            {/* Additional Settings Sections can be added here */}
           </div>
         </div>
-
-        {/* Additional Settings Sections can be added here */}
       </div>
     </div>
   );
