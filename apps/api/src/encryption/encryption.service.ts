@@ -42,7 +42,7 @@ export class EncryptionService {
       const iv = crypto.randomBytes(this.ivLength);
       
       // Create cipher
-      const cipher = crypto.createCipher(this.algorithm, this.key);
+      const cipher = crypto.createCipheriv('aes-256-gcm', this.key, iv);
       
       // Set additional authenticated data
       const aad = Buffer.from('noessi-mail-encryption', 'utf8');
@@ -87,8 +87,8 @@ export class EncryptionService {
       const encrypted = Buffer.from(encryptedBase64, 'base64');
       const tag = Buffer.from(tagBase64, 'base64');
       
-      // Create decipher
-      const decipher = crypto.createDecipher(this.algorithm, this.key);
+      // Create decipher  
+      const decipher = crypto.createDecipheriv('aes-256-gcm', this.key, iv);
       
       // Set additional authenticated data and auth tag
       const aad = Buffer.from('noessi-mail-encryption', 'utf8');

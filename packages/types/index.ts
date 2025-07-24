@@ -30,4 +30,38 @@ export interface RefreshTokenDto {
   refreshToken: string;
 }
 
+export interface CreateEmailAccountData {
+  email: string;
+  provider: string;
+  // OAuth2 fields
+  accessToken?: string;
+  refreshToken?: string;
+  tokenExpiresAt?: Date;
+  // IMAP/SMTP fields
+  imapHost?: string;
+  imapPort?: number;
+  imapSecurity?: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpSecurity?: string;
+  password?: string;
+}
+
+export interface UpdateEmailAccountData {
+  email?: string;
+  provider?: string;
+  // OAuth2 fields
+  accessToken?: string;
+  refreshToken?: string;
+  tokenExpiresAt?: Date;
+  // IMAP/SMTP fields
+  imapHost?: string;
+  imapPort?: number;
+  imapSecurity?: string;
+  smtpHost?: string;
+  smtpPort?: number;
+  smtpSecurity?: string;
+  password?: string;
+}
+
 export * from "@noessi/database";

@@ -43,14 +43,14 @@ apiClient.interceptors.response.use(
           refreshToken,
         });
 
-        localStorage.setItem("accessToken", response.data.accessToken);
-        localStorage.setItem("refreshToken", response.data.refreshToken);
+        localStorage.setItem("accessToken", response.data.data.accessToken);
+        localStorage.setItem("refreshToken", response.data.data.refreshToken);
         
         // Also update cookies
-        document.cookie = `accessToken=${response.data.accessToken}; path=/; max-age=900; SameSite=Lax`;
-        document.cookie = `refreshToken=${response.data.refreshToken}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `accessToken=${response.data.data.accessToken}; path=/; max-age=900; SameSite=Lax`;
+        document.cookie = `refreshToken=${response.data.data.refreshToken}; path=/; max-age=604800; SameSite=Lax`;
 
-        originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
+        originalRequest.headers.Authorization = `Bearer ${response.data.data.accessToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
         // Refresh failed, clear tokens and redirect to home

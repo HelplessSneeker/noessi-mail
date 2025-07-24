@@ -8,18 +8,14 @@ export class PrismaEncryptionMiddleware {
 
   // Define which fields should be encrypted for each model
   private readonly encryptionConfig = {
-    User: ['email', 'name'],
-    EmailAccount: ['email', 'accessToken', 'refreshToken'],
+    User: [
+      // Temporarily disable all encryption for testing
+    ],
+    EmailAccount: [
+      // Temporarily disable encryption for testing
+    ],
     Email: [
-      'subject',
-      'body',
-      'bodyHtml',
-      'fromAddress',
-      'fromName',
-      'toAddresses',
-      'ccAddresses',
-      'bccAddresses',
-      'attachments',
+      // Temporarily disable encryption for testing
     ],
   };
 

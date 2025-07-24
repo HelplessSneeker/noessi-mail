@@ -121,6 +121,24 @@
     "emailRequired": "Email address is required",
     "invalidEmail": "Please enter a valid email address",
     "providerRequired": "Provider is required",
-    "emailAlreadyExists": "This email account already exists"
+    "emailAlreadyExists": "This email account already exists",
+    "selectProvider": "Select Email Provider",
+    "oauthConnection": "OAuth2 Connection",
+    "oauthDescription": "You'll be redirected to {provider} to authorize access to your email account",
+    "connectWith": "Connect with {provider}",
+    "imapSettings": "IMAP Settings",
+    "smtpSettings": "SMTP Settings",
+    "imapHost": "IMAP Host",
+    "imapPort": "IMAP Port",
+    "smtpHost": "SMTP Host",
+    "smtpPort": "SMTP Port",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your email password",
+    "testAndSave": "Test & Save",
+    "imapHostRequired": "IMAP host is required",
+    "imapPortInvalid": "IMAP port must be between 1 and 65535",
+    "smtpHostRequired": "SMTP host is required",
+    "smtpPortInvalid": "SMTP port must be between 1 and 65535",
+    "passwordRequired": "Password is required"
   }
 }

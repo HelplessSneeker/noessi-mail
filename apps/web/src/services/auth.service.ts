@@ -3,23 +3,23 @@ import { LoginDto, RegisterDto, AuthResponse } from '@noessi/types';
 
 export const authService = {
   async register(data: RegisterDto): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/register', data);
+    const response = await apiClient.post<{success: boolean, data: AuthResponse}>('/auth/register', data);
     try {
-      authService.saveTokens(response.data);
+      authService.saveTokens(response.data.data);
     } catch (error) {
       console.warn('Failed to save tokens to localStorage:', error);
     }
-    return response.data;
+    return response.data.data;
   },
 
   async login(data: LoginDto): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/login', data);
+    const response = await apiClient.post<{success: boolean, data: AuthResponse}>('/auth/login', data);
     try {
-      authService.saveTokens(response.data);
+      authService.saveTokens(response.data.data);
     } catch (error) {
       console.warn('Failed to save tokens to localStorage:', error);
     }
-    return response.data;
+    return response.data.data;
   },
 
   async logout(): Promise<void> {
@@ -32,7 +32,7 @@ export const authService = {
 
   async getMe() {
     const response = await apiClient.post('/auth/me');
-    return response.data.user;
+    return response.data.data.user;
   },
 
   saveTokens(data: AuthResponse) {

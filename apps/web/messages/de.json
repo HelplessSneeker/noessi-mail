@@ -121,6 +121,24 @@
     "emailRequired": "E-Mail-Adresse ist erforderlich",
     "invalidEmail": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
     "providerRequired": "Anbieter ist erforderlich",
-    "emailAlreadyExists": "Dieses E-Mail-Konto existiert bereits"
+    "emailAlreadyExists": "Dieses E-Mail-Konto existiert bereits",
+    "selectProvider": "E-Mail-Anbieter auswählen",
+    "oauthConnection": "OAuth2-Verbindung",
+    "oauthDescription": "Sie werden zu {provider} weitergeleitet, um den Zugriff auf Ihr E-Mail-Konto zu autorisieren",
+    "connectWith": "Mit {provider} verbinden",
+    "imapSettings": "IMAP-Einstellungen",
+    "smtpSettings": "SMTP-Einstellungen",
+    "imapHost": "IMAP-Host",
+    "imapPort": "IMAP-Port",
+    "smtpHost": "SMTP-Host",
+    "smtpPort": "SMTP-Port",
+    "password": "Passwort",
+    "passwordPlaceholder": "E-Mail-Passwort eingeben",
+    "testAndSave": "Testen & Speichern",
+    "imapHostRequired": "IMAP-Host ist erforderlich",
+    "imapPortInvalid": "IMAP-Port muss zwischen 1 und 65535 liegen",
+    "smtpHostRequired": "SMTP-Host ist erforderlich",
+    "smtpPortInvalid": "SMTP-Port muss zwischen 1 und 65535 liegen",
+    "passwordRequired": "Passwort ist erforderlich"
   }
 }

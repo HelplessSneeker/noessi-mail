@@ -1,4 +1,4 @@
-import { IsEmail, IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEmail, IsString, IsNotEmpty, IsOptional, IsInt, IsIn, Min, Max } from 'class-validator';
 
 export class CreateEmailAccountDto {
   @IsEmail()
@@ -7,8 +7,10 @@ export class CreateEmailAccountDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsIn(['gmail', 'outlook', 'imap'])
   provider: string;
 
+  // OAuth2 fields (for Gmail, Outlook)
   @IsOptional()
   @IsString()
   accessToken?: string;
@@ -19,6 +21,41 @@ export class CreateEmailAccountDto {
 
   @IsOptional()
   tokenExpiresAt?: Date;
+
+  // IMAP/SMTP fields (for manual configuration)
+  @IsOptional()
+  @IsString()
+  imapHost?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  imapPort?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['tls', 'starttls', 'none'])
+  imapSecurity?: string;
+
+  @IsOptional()
+  @IsString()
+  smtpHost?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  smtpPort?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['tls', 'starttls', 'none'])
+  smtpSecurity?: string;
+
+  @IsOptional()
+  @IsString()
+  password?: string;
 }
 
 export class UpdateEmailAccountDto {
@@ -28,8 +65,10 @@ export class UpdateEmailAccountDto {
 
   @IsOptional()
   @IsString()
+  @IsIn(['gmail', 'outlook', 'imap'])
   provider?: string;
 
+  // OAuth2 fields (for Gmail, Outlook)
   @IsOptional()
   @IsString()
   accessToken?: string;
@@ -40,4 +79,39 @@ export class UpdateEmailAccountDto {
 
   @IsOptional()
   tokenExpiresAt?: Date;
+
+  // IMAP/SMTP fields (for manual configuration)
+  @IsOptional()
+  @IsString()
+  imapHost?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  imapPort?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['tls', 'starttls', 'none'])
+  imapSecurity?: string;
+
+  @IsOptional()
+  @IsString()
+  smtpHost?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  smtpPort?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['tls', 'starttls', 'none'])
+  smtpSecurity?: string;
+
+  @IsOptional()
+  @IsString()
+  password?: string;
 }

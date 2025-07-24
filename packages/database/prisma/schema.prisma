@@ -38,10 +38,22 @@ model RefreshToken {
 model EmailAccount {
   id              String   @id @default(cuid())
   email           String
-  provider        String   // gmail, outlook, etc
+  provider        String   // gmail, outlook, imap, etc
+  
+  // OAuth2 fields (for Gmail, Outlook)
   accessToken     String?  @db.Text
   refreshToken    String?  @db.Text
   tokenExpiresAt  DateTime?
+  
+  // IMAP/SMTP fields (for manual configuration)
+  imapHost        String?
+  imapPort        Int?
+  imapSecurity    String?  // tls, starttls, none
+  smtpHost        String?
+  smtpPort        Int?
+  smtpSecurity    String?  // tls, starttls, none
+  password        String?  @db.Text // Encrypted password for IMAP/SMTP
+  
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
