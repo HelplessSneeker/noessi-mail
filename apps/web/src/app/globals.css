@@ -3,6 +3,34 @@
 @tailwind utilities;
 
 @layer base {
+  /* Global smooth transitions */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* Disable transitions during page load */
+  .preload * {
+    transition: none !important;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Focus ring improvements */
+  *:focus {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    transition: outline-color 150ms ease-out;
+  }
+
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+
   :root {
     /* Light Theme - Noessi Mail Blue Theme */
     --background: 0 0% 100%;
@@ -62,5 +90,130 @@
     --brand-secondary: 217 91% 60%;   /* blue-600 for dark */
     --brand-light: 215 28% 17%;       /* Dark blue background */
     --brand-muted: 217.2 32.6% 17.5%; /* Dark muted */
+  }
+}
+
+@layer components {
+  /* Enhanced button animations */
+  .btn-animated {
+    @apply transform transition-all duration-200 ease-out;
+  }
+  
+  .btn-animated:hover {
+    @apply scale-105 shadow-lg;
+  }
+  
+  .btn-animated:active {
+    @apply scale-95;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .card-hover:hover {
+    @apply shadow-lg transform -translate-y-1;
+  }
+
+  /* Sidebar transition */
+  .sidebar-item {
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  .sidebar-item:hover {
+    @apply bg-secondary/60 translate-x-1;
+  }
+
+  /* Email list item animations */
+  .email-item {
+    @apply transition-all duration-200 ease-out;
+  }
+  
+  .email-item:hover {
+    @apply bg-secondary/30 scale-[1.02] shadow-sm;
+  }
+
+  /* Loading states */
+  .loading-shimmer {
+    @apply animate-pulse;
+  }
+
+  .loading-spinner {
+    @apply border-4 border-gray-200 border-t-brand-600 rounded-full animate-spin;
+  }
+
+  /* Loading dots animation */
+  .loading-dots {
+    @apply flex space-x-1;
+  }
+
+  .loading-dots > div {
+    @apply w-2 h-2 bg-brand-600 rounded-full animate-bounce;
+  }
+
+  .loading-dots > div:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+
+  .loading-dots > div:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply bg-gray-200 rounded animate-pulse;
+  }
+
+  .skeleton-text {
+    @apply h-4 bg-gray-200 rounded animate-pulse;
+  }
+
+  .skeleton-avatar {
+    @apply w-10 h-10 bg-gray-200 rounded-full animate-pulse;
+  }
+
+  /* Content transition effects */
+  .content-transition-enter {
+    @apply animate-fade-in-up;
+  }
+  
+  .content-transition-exit {
+    @apply animate-fade-out-down;
+  }
+  
+  .slide-transition-enter-left {
+    @apply animate-slide-in-from-left;
+  }
+  
+  .slide-transition-enter-right {
+    @apply animate-slide-in-from-right;
+  }
+  
+  .slide-transition-exit-left {
+    @apply animate-slide-out-to-left;
+  }
+  
+  .slide-transition-exit-right {
+    @apply animate-slide-out-to-right;
+  }
+
+  /* Email selection transition */
+  .email-selection-transition {
+    @apply transition-all duration-500 ease-out-quart;
+  }
+
+  /* Page transition container */
+  .page-transition {
+    @apply transition-all duration-700 ease-out-expo;
+  }
+
+  /* Responsive animations */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }

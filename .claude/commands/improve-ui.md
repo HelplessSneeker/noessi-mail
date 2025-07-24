@@ -14,6 +14,7 @@
 - Mobile responsiveness
 - Modern design patterns
 - Consistent component styling
+- Animation performance and skeleton optimization
 
 ## Examples
 - `/improve-ui /dashboard` - Improve dashboard layout
@@ -25,5 +26,10 @@
 - Preserve existing functionality and i18n
 - Use existing Tailwind/Radix patterns
 - Maintain TypeScript types
+
+## Animation Preferences
+- **Transitions**: Prefer `ease-out` over `ease-out-expo`, 200-300ms duration
+- **Skeletons**: Static loading states for content switches, avoid during transitions
+- **Performance**: Use `opacity`/`transform`, avoid layout shifts and animation conflicts
 
 Auto-accepts all Playwright dialogs/permissions.

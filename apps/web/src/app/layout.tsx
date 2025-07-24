@@ -21,7 +21,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} preload`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              document.body.classList.add('preload');
+              window.addEventListener('load', () => {
+                setTimeout(() => {
+                  document.body.classList.remove('preload');
+                }, 100);
+              });
+            `,
+          }}
+        />
         <Providers>{children}</Providers>
       </body>
     </html>

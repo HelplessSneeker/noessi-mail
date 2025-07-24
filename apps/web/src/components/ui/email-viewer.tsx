@@ -5,28 +5,34 @@ import { useTranslations } from 'next-intl';
 import { cn } from "@/lib/utils";
 import { Email } from "@/lib/mock-emails";
 import { Button } from "./button";
+import { EmailViewerSkeleton } from "./dashboard-skeleton";
 
 interface EmailViewerProps {
   email: Email | null;
   onClose?: () => void;
   className?: string;
+  isLoading?: boolean;
 }
 
-export function EmailViewer({ email, onClose, className }: EmailViewerProps) {
+export function EmailViewer({ email, onClose, className, isLoading = false }: EmailViewerProps) {
   const t = useTranslations('email');
+  
+  if (isLoading) {
+    return <EmailViewerSkeleton />;
+  }
   
   if (!email) {
     return (
-      <div className={cn("flex flex-col h-full bg-gray-50 border-l border-gray-200", className)}>
+      <div className={cn("flex flex-col h-full bg-gray-50 border-l border-gray-200 animate-fade-in", className)}>
         <div className="flex-1 flex items-center justify-center p-8">
-          <div className="text-center">
-            <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center animate-fade-in-up">
+            <svg className="w-16 h-16 text-gray-300 mx-auto mb-4 transition-all duration-300 hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            <h3 className="text-lg font-medium text-gray-500 mb-2">
+            <h3 className="text-lg font-medium text-gray-500 mb-2 transition-colors">
               Select an email
             </h3>
-            <p className="text-gray-400">
+            <p className="text-gray-400 transition-colors">
               Choose an email from the list to view its content
             </p>
           </div>
@@ -109,7 +115,7 @@ export function EmailViewer({ email, onClose, className }: EmailViewerProps) {
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="ml-4 h-8 w-8 p-0"
+              className="ml-4 h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600 transition-colors"
             >
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -120,19 +126,19 @@ export function EmailViewer({ email, onClose, className }: EmailViewerProps) {
         
         {/* Action buttons */}
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="transition-colors">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
             </svg>
             {t('reply')}
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="transition-colors">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16l2.879-2.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             {t('replyAll')}
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="transition-colors">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
             </svg>
@@ -142,7 +148,7 @@ export function EmailViewer({ email, onClose, className }: EmailViewerProps) {
           <div className="flex-1"></div>
           
           {email.folder !== 'deleted' && (
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="transition-colors">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>

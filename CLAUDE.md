@@ -19,13 +19,21 @@ pnpm db:push                # Update database schema
 **Test Credentials**: `test@example.com` / `password123`
 
 ## Current Status
-✅ **Complete**: Auth (JWT), encryption (AES-256-GCM), email accounts, UI framework, i18n
+✅ **Complete**: Auth (JWT), encryption (AES-256-GCM), email accounts, UI framework, i18n, animations, loading states
 🚧 **Next**: Email composer, OAuth2, IMAP integration, real email fetching
 
 ## Key Fixes Applied
 1. **Crypto API**: Use `createCipheriv`/`createDecipheriv` (not `createCipherGCM`)
 2. **Email Form**: Filter empty strings before API submission (NestJS validation)
 3. **JWT Auth**: Include `userId` in strategy return for proper user relations
+
+## UI/UX System
+**Theme**: Noessi Mail blue (`--brand-primary: 217 91% 60%`) with comprehensive HSL variables in `globals.css`
+**Animations**: Optimized Tailwind config with fadeIn/Out, slideIn/Out, scaleIn/Out + `ease-out` preferred over heavy easing
+**Transitions**: State-managed with `isTransitioning` + 200-300ms delays, opacity-based for smooth content swapping
+**Loading**: Multi-variant spinner system (`default`, `dots`, `pulse`, `ripple`) + static skeletons for structure preview
+**Performance**: Avoid animation conflicts (skeleton + transition), prefer `opacity`/`transform` over layout shifts
+**Responsive**: Mobile-first breakpoints (sm/md/lg) with adaptive layouts
 
 ## Custom Commands
 - `/improve-ui [route|component]` - UI/UX improvements with Playwright automation

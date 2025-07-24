@@ -5,19 +5,38 @@ import { useTranslations } from 'next-intl';
 import { cn } from "@/lib/utils";
 import { Email, getEmailsByFolder } from "@/lib/mock-emails";
 import { EmailItem } from "./email-item";
+import { LoadingSpinner } from "./loading-spinner";
 
 interface EmailListProps {
   selectedFolder: string;
   selectedEmail?: Email | null;
   onEmailSelect: (email: Email) => void;
   className?: string;
+  isLoading?: boolean;
 }
 
-export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, className }: EmailListProps) {
+export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, className, isLoading = false }: EmailListProps) {
   const t = useTranslations('email');
   const tSidebar = useTranslations('sidebar');
+  const [animatingEmails, setAnimatingEmails] = React.useState<Set<string>>(new Set());
   
   const emails = getEmailsByFolder(selectedFolder);
+
+  const handleEmailClick = (email: Email) => {
+    if (selectedEmail?.id === email.id) return;
+    
+    setAnimatingEmails(prev => new Set(prev).add(email.id));
+    
+    // Brief delay for selection animation
+    setTimeout(() => {
+      onEmailSelect(email);
+      setAnimatingEmails(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(email.id);
+        return newSet;
+      });
+    }, 150);
+  };
   
   const getFolderDisplayName = (folder: string) => {
     switch (folder) {
@@ -84,7 +103,7 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
         
         {/* Action buttons */}
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-md border">
+          <button className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-md border transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
@@ -92,7 +111,7 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
           </button>
           
           {selectedFolder !== 'deleted' && (
-            <button className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-md border">
+            <button className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 rounded-md border transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -104,14 +123,30 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
       
       {/* Email list */}
       <div className="flex-1 overflow-y-auto">
-        {emails.map((email) => (
-          <EmailItem
-            key={email.id}
-            email={email}
-            isSelected={selectedEmail?.id === email.id}
-            onClick={onEmailSelect}
-          />
-        ))}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <LoadingSpinner 
+              size="lg" 
+              variant="dots" 
+              text="Loading emails..."
+            />
+          </div>
+        ) : (
+          emails.map((email) => (
+            <div 
+              key={email.id} 
+              className={`transition-colors ${
+                animatingEmails.has(email.id) ? 'bg-blue-50' : ''
+              }`}
+            >
+              <EmailItem
+                email={email}
+                isSelected={selectedEmail?.id === email.id}
+                onClick={handleEmailClick}
+              />
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -76,12 +76,13 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
         
         <nav className="flex-1 p-4">
           <ul className="space-y-1">
-            {folders.map((folder) => (
+            {folders.map((folder, index) => (
               <li key={folder.id}>
                 <Button
                   variant="ghost"
                   className={cn(
-                    "w-full justify-start h-11 px-3 rounded-md text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors",
+                    "w-full justify-start h-11 px-3 rounded-md transition-colors",
+                    "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
                     selectedFolder === folder.id && "bg-blue-50 text-blue-700 hover:bg-blue-100 border-r-2 border-blue-500"
                   )}
                   onClick={() => onFolderSelect?.(folder.id)}
@@ -113,12 +114,12 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
         <div className="p-4 border-t border-gray-200">
           <Button
             variant="outline"
-            className="w-full justify-start h-10 px-3 text-sm font-medium text-gray-700 hover:text-gray-900"
+            className="w-full justify-start h-10 px-3 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
           >
             <svg className="w-4 h-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-{tEmail('compose')}
+            {tEmail('compose')}
           </Button>
         </div>
       </div>
