@@ -15,9 +15,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$connect();
     
     // Apply encryption middleware
-    // Temporarily disabled for testing
-    // const encryptionMiddleware = new PrismaEncryptionMiddleware(this.encryptionService);
-    // encryptionMiddleware.applyMiddleware(this);
+    const encryptionMiddleware = new PrismaEncryptionMiddleware(this.encryptionService);
+    encryptionMiddleware.applyMiddleware(this);
   }
 
   async onModuleDestroy() {

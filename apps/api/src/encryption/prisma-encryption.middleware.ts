@@ -9,13 +9,25 @@ export class PrismaEncryptionMiddleware {
   // Define which fields should be encrypted for each model
   private readonly encryptionConfig = {
     User: [
-      // Temporarily disable all encryption for testing
+      'email',
+      'name'
     ],
     EmailAccount: [
-      // Temporarily disable encryption for testing
+      'email',
+      'accessToken',
+      'refreshToken',
+      'password'
     ],
     Email: [
-      // Temporarily disable encryption for testing
+      'subject',
+      'body',
+      'bodyHtml',
+      'fromAddress',
+      'fromName',
+      'toAddresses',
+      'ccAddresses',
+      'bccAddresses',
+      'attachments'
     ],
   };
 
@@ -35,9 +47,6 @@ export class PrismaEncryptionMiddleware {
     if (!fieldsToEncrypt || fieldsToEncrypt.length === 0) {
       return;
     }
-
-    // Convert model name to lowercase for Prisma client access
-    const modelKey = modelName.charAt(0).toLowerCase() + modelName.slice(1);
 
     // Apply middleware for create operations
     prisma.$use(async (params, next) => {
