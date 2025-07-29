@@ -11,7 +11,7 @@ import { EmailList } from '@/components/ui/email-list';
 import { EmailViewer } from '@/components/ui/email-viewer';
 import { LoadingSpinner, LoadingOverlay } from '@/components/ui/loading-spinner';
 import { DashboardSkeleton } from '@/components/ui/dashboard-skeleton';
-import { Email, getEmailsByFolder } from '@/lib/mock-emails';
+import { Email, emailService } from '@/services/email.service';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -24,6 +24,7 @@ export default function DashboardPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   
   useEffect(() => {
     setIsMounted(true);
@@ -38,6 +39,20 @@ export default function DashboardPage() {
     queryFn: authService.getMe,
     retry: false,
     enabled: isMounted && authService.isAuthenticated(),
+  });
+
+  const { data: emailStats, isLoading: isStatsLoading, error: statsError } = useQuery({
+    queryKey: ['emailStats'],
+    queryFn: emailService.getEmailStats,
+    retry: (failureCount, error: any) => {
+      // Don't retry on authentication errors
+      if (error?.message?.includes('401') || error?.message?.includes('403')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
+    enabled: isMounted && authService.isAuthenticated(),
+    refetchOnWindowFocus: false,
   });
 
   // Handle smooth transition from skeleton when data is loaded
@@ -98,6 +113,7 @@ export default function DashboardPage() {
     setTimeout(() => {
       setSelectedFolder(folderId);
       setSelectedEmail(null); // Clear selected email when changing folders
+      setSearchQuery(''); // Clear search when changing folders
       setShowStats(true);
       console.log('Selected folder:', folderId);
       setIsTransitioning(false);
@@ -128,23 +144,17 @@ export default function DashboardPage() {
     }, 200);
   };
 
-  // Get folder email counts for stats
-  const getEmailCounts = () => {
-    const inboxEmails = getEmailsByFolder('inbox');
-    const sentEmails = getEmailsByFolder('sent');
-    const spamEmails = getEmailsByFolder('spam');
-    const deletedEmails = getEmailsByFolder('deleted');
-    
-    return {
-      inbox: inboxEmails.length,
-      sent: sentEmails.length,
-      spam: spamEmails.length,
-      deleted: deletedEmails.length,
-      unread: inboxEmails.filter(email => !email.isRead).length
-    };
+  // Use email stats from API
+  const emailCounts = emailStats || {
+    inbox: 0,
+    sent: 0,
+    spam: 0,
+    deleted: 0,
+    unread: 0,
+    total: 0,
+    starred: 0,
+    drafts: 0,
   };
-
-  const emailCounts = getEmailCounts();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -153,6 +163,24 @@ export default function DashboardPage() {
         text="Signing out..." 
         variant="dots"
       />
+      
+      {/* Connection Error Banner */}
+      {statsError && (
+        <div className="bg-red-50 border-b border-red-200 px-4 py-3">
+          <div className="flex items-center max-w-7xl mx-auto">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-800">
+                Unable to connect to email server. Please check your email account settings.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       <Navbar
         onLogout={() => logoutMutation.mutate()}
@@ -180,6 +208,8 @@ export default function DashboardPage() {
               selectedEmail={selectedEmail}
               onEmailSelect={handleEmailSelect}
               isLoading={isRefreshing}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
             />
           </div>
           
@@ -191,6 +221,8 @@ export default function DashboardPage() {
                 selectedEmail={selectedEmail}
                 onEmailSelect={handleEmailSelect}
                 isLoading={isRefreshing}
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
               />
             </div>
           )}

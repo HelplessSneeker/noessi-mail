@@ -168,8 +168,39 @@ Content-Type: application/json
 - **Demo Endpoints**: `/demo/*` for testing error scenarios
 - **Development Context**: Stack traces only in dev mode
 
+## Frontend Service Layer Pattern
+
+The standardized API response structure requires frontend services to extract data properly:
+
+**Correct Pattern:**
+```typescript
+async getEmails(): Promise<EmailListResponse> {
+  const response = await fetch(`${API_URL}/emails`);
+  const result = await response.json();
+  return result.data; // Extract data from {success, data, meta}
+}
+```
+
+**Common Anti-Pattern (AVOID):**
+```typescript
+async getEmails(): Promise<EmailListResponse> {
+  const response = await fetch(`${API_URL}/emails`);
+  return response.json(); // Returns {success, data, meta} instead of data
+}
+```
+
+**Debug Verification:**
+```javascript
+// In browser console - verify API structure
+fetch('/api/emails?limit=1', {headers: {'Authorization': `Bearer ${localStorage.getItem('accessToken')}`}})
+  .then(r => r.json())
+  .then(data => console.log('API Structure:', data));
+// Should show: {success: true, data: {emails: [...], total: N}, meta: {...}}
+```
+
 ## Implementation
 - Global exception filter handles all errors consistently
 - Response interceptor standardizes success responses
 - Winston logging with structured output
 - Test endpoints for validation scenarios
+- Frontend services must extract `result.data` for proper type safety

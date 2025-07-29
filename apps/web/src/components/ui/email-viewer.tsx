@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useTranslations } from 'next-intl';
 import { cn } from "@/lib/utils";
-import { Email } from "@/lib/mock-emails";
+import { Email } from "@/services/email.service";
 import { Button } from "./button";
 import { EmailViewerSkeleton } from "./dashboard-skeleton";
 
@@ -16,6 +16,17 @@ interface EmailViewerProps {
 
 export function EmailViewer({ email, onClose, className, isLoading = false }: EmailViewerProps) {
   const t = useTranslations('email');
+  const [isMarkingAsRead, setIsMarkingAsRead] = React.useState(false);
+  
+  // Auto-mark as read when email is opened
+  React.useEffect(() => {
+    if (email && !email.isRead && !isMarkingAsRead) {
+      setIsMarkingAsRead(true);
+      // In a real implementation, you would call the API here
+      // emailService.markAsRead(email.id).finally(() => setIsMarkingAsRead(false));
+      setTimeout(() => setIsMarkingAsRead(false), 500);
+    }
+  }, [email?.id, email?.isRead, isMarkingAsRead]);
   
   if (isLoading) {
     return <EmailViewerSkeleton />;
@@ -161,9 +172,19 @@ export function EmailViewer({ email, onClose, className, isLoading = false }: Em
       {/* Email content */}
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="prose max-w-none">
-          <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
-            {email.body}
-          </p>
+          {/* Render HTML content if available, otherwise plain text */}
+          {email.body.includes('<') && email.body.includes('>') ? (
+            <div 
+              className="text-gray-900 leading-relaxed"
+              dangerouslySetInnerHTML={{ 
+                __html: email.body.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') 
+              }}
+            />
+          ) : (
+            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
+              {email.body}
+            </p>
+          )}
         </div>
         
         {/* Attachments section */}

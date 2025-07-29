@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Email } from "@/lib/mock-emails";
+import { Email } from "@/services/email.service";
 
 interface EmailItemProps {
   email: Email;
