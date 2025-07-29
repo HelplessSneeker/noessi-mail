@@ -216,7 +216,7 @@ export const emailService = {
         email: addr,
       })),
       subject: apiEmail.subject || '(no subject)',
-      body: apiEmail.body || apiEmail.bodyHtml || '',
+      body: apiEmail.bodyHtml || apiEmail.body || '',
       date: new Date(apiEmail.receivedAt || apiEmail.sentAt || apiEmail.createdAt),
       isRead: apiEmail.isRead,
       isStarred: apiEmail.isStarred,

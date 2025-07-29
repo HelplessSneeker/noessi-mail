@@ -79,15 +79,15 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
 
   if (showLoading) {
     return (
-      <div className={cn("flex flex-col h-full bg-white", className)}>
-        <div className="border-b border-gray-200 p-4">
+      <div className={cn("flex flex-col h-full bg-white shadow-sm", className)}>
+        <div className="border-b border-gray-200 p-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">
               {getFolderDisplayName(selectedFolder)}
             </h2>
           </div>
         </div>
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center min-h-0">
           <LoadingSpinner variant="dots" size="lg" />
         </div>
       </div>
@@ -96,15 +96,15 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
 
   if (emailsError) {
     return (
-      <div className={cn("flex flex-col h-full bg-white", className)}>
-        <div className="border-b border-gray-200 p-4">
+      <div className={cn("flex flex-col h-full bg-white shadow-sm", className)}>
+        <div className="border-b border-gray-200 p-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">
               {getFolderDisplayName(selectedFolder)}
             </h2>
           </div>
         </div>
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-8 min-h-0">
           <div className="text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
               <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,8 +129,8 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
 
   if (!emails.length) {
     return (
-      <div className={cn("flex flex-col h-full bg-white", className)}>
-        <div className="border-b border-gray-200 p-4">
+      <div className={cn("flex flex-col h-full bg-white shadow-sm", className)}>
+        <div className="border-b border-gray-200 p-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">
               {getFolderDisplayName(selectedFolder)}
@@ -139,7 +139,7 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
           </div>
         </div>
         
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-8 min-h-0">
           <div className="text-center">
             <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m0 0V9a2 2 0 012-2h8a2 2 0 012 2v4M6 13h12" />
@@ -157,20 +157,20 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
   }
 
   return (
-    <div className={cn("flex flex-col h-full bg-white", className)}>
+    <div className={cn("flex flex-col h-full bg-white shadow-sm", className)}>
       {/* Header */}
-      <div className="border-b border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-900">
+      <div className="border-b border-gray-200 p-6 flex-shrink-0">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-gray-900">
             {getFolderDisplayName(selectedFolder)}
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {unreadCount > 0 && (
-              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              <span className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
                 {unreadCount} unread
               </span>
             )}
-            <span className="text-sm text-gray-500">{emails.length} emails</span>
+            <span className="text-sm text-gray-500 font-medium">{emails.length} emails</span>
           </div>
         </div>
         
@@ -224,8 +224,8 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
         )}
       </div>
       
-      {/* Email list */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Email list - vertical scroll, horizontal contained */}
+      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden email-list-scrollbar">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <LoadingSpinner 
@@ -235,20 +235,22 @@ export function EmailList({ selectedFolder, selectedEmail, onEmailSelect, classN
             />
           </div>
         ) : (
-          emails.map((email: Email) => (
-            <div 
-              key={email.id} 
-              className={`transition-colors ${
-                animatingEmails.has(email.id) ? 'bg-blue-50' : ''
-              }`}
-            >
-              <EmailItem
-                email={email}
-                isSelected={selectedEmail?.id === email.id}
-                onClick={handleEmailClick}
-              />
-            </div>
-          ))
+          <div className="divide-y divide-gray-100">
+            {emails.map((email: Email) => (
+              <div 
+                key={email.id} 
+                className={`transition-colors hover:bg-gray-50 ${
+                  animatingEmails.has(email.id) ? 'bg-blue-50' : ''
+                }`}
+              >
+                <EmailItem
+                  email={email}
+                  isSelected={selectedEmail?.id === email.id}
+                  onClick={handleEmailClick}
+                />
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

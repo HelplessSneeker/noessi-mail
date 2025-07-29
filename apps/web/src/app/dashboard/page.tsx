@@ -157,7 +157,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-screen flex-col">
       <LoadingOverlay 
         isVisible={logoutMutation.isPending} 
         text="Signing out..." 
@@ -166,7 +166,7 @@ export default function DashboardPage() {
       
       {/* Connection Error Banner */}
       {statsError && (
-        <div className="bg-red-50 border-b border-red-200 px-4 py-3">
+        <div className="bg-red-50 border-b border-red-200 px-4 py-3 flex-shrink-0">
           <div className="flex items-center max-w-7xl mx-auto">
             <div className="flex-shrink-0">
               <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -182,27 +182,29 @@ export default function DashboardPage() {
         </div>
       )}
       
-      <Navbar
-        onLogout={() => logoutMutation.mutate()}
-        onSettings={handleSettings}
-        onRefresh={handleRefresh}
-        onUserSettings={handleUserSettings}
-        isLoading={logoutMutation.isPending}
-        isRefreshing={isRefreshing}
-      />
+      <div className="flex-shrink-0">
+        <Navbar
+          onLogout={() => logoutMutation.mutate()}
+          onSettings={handleSettings}
+          onRefresh={handleRefresh}
+          onUserSettings={handleUserSettings}
+          isLoading={logoutMutation.isPending}
+          isRefreshing={isRefreshing}
+        />
+      </div>
       
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-0">
         {/* Desktop Sidebar */}
-        <div className="hidden lg:block">
+        <div className="hidden lg:block flex-shrink-0">
           <Sidebar 
             selectedFolder={selectedFolder}
             onFolderSelect={handleFolderSelect}
           />
         </div>
         
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex min-h-0">
           {/* Email List */}
-          <div className="w-80 flex-shrink-0 hidden md:block">
+          <div className="w-80 flex-shrink-0 hidden md:block border-r border-gray-200 bg-white">
             <EmailList 
               selectedFolder={selectedFolder}
               selectedEmail={selectedEmail}
@@ -232,7 +234,7 @@ export default function DashboardPage() {
             <div className={`transition-all duration-300 ease-out ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
               {showStats && !selectedEmail ? (
                 /* Stats Dashboard */
-                <div className="flex-1 bg-gray-50 p-3 sm:p-6 overflow-y-auto">
+                <div className="flex-1 bg-gray-50 p-3 sm:p-6 overflow-y-auto scrollbar-thin">
                   <div className="h-full max-w-4xl mx-auto">
                     <div className="mb-6 sm:mb-8">
                       <h1 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2">{t('title')}</h1>

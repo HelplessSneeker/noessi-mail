@@ -35,7 +35,7 @@ export function EmailViewer({ email, onClose, className, isLoading = false }: Em
   if (!email) {
     return (
       <div className={cn("flex flex-col h-full bg-gray-50 border-l border-gray-200 animate-fade-in", className)}>
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 min-h-0 flex items-center justify-center p-8">
           <div className="text-center animate-fade-in-up">
             <svg className="w-16 h-16 text-gray-300 mx-auto mb-4 transition-all duration-300 hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -78,14 +78,14 @@ export function EmailViewer({ email, onClose, className, isLoading = false }: Em
   return (
     <div className={cn("flex flex-col h-full bg-white border-l border-gray-200", className)}>
       {/* Header */}
-      <div className="border-b border-gray-200 p-6">
+      <div className="border-b border-gray-200 p-8 flex-shrink-0">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-semibold text-gray-900 mb-2 pr-4">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4 pr-4 leading-tight">
               {email.subject}
             </h1>
             
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               {getPriorityBadge(email.priority)}
               {email.isStarred && (
                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
@@ -105,17 +105,17 @@ export function EmailViewer({ email, onClose, className, isLoading = false }: Em
               )}
             </div>
             
-            <div className="space-y-2 text-sm text-gray-600">
-              <div className="flex items-center">
-                <span className="font-medium w-12">{t('from')}:</span>
-                <span>{email.from.name} &lt;{email.from.email}&gt;</span>
+            <div className="space-y-3 text-base text-gray-600">
+              <div className="flex items-start">
+                <span className="font-semibold w-16 text-gray-700 flex-shrink-0">{t('from')}:</span>
+                <span className="break-words">{email.from.name} &lt;{email.from.email}&gt;</span>
               </div>
-              <div className="flex items-center">
-                <span className="font-medium w-12">{t('to')}:</span>
-                <span>{email.to.map(recipient => `${recipient.name} <${recipient.email}>`).join(', ')}</span>
+              <div className="flex items-start">
+                <span className="font-semibold w-16 text-gray-700 flex-shrink-0">{t('to')}:</span>
+                <span className="break-words">{email.to.map(recipient => `${recipient.name} <${recipient.email}>`).join(', ')}</span>
               </div>
-              <div className="flex items-center">
-                <span className="font-medium w-12">Date:</span>
+              <div className="flex items-start">
+                <span className="font-semibold w-16 text-gray-700 flex-shrink-0">Date:</span>
                 <span>{formatDate(email.date)}</span>
               </div>
             </div>
@@ -136,7 +136,7 @@ export function EmailViewer({ email, onClose, className, isLoading = false }: Em
         </div>
         
         {/* Action buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 mt-6">
           <Button variant="outline" size="sm" className="transition-colors">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -170,20 +170,43 @@ export function EmailViewer({ email, onClose, className, isLoading = false }: Em
       </div>
       
       {/* Email content */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        <div className="prose max-w-none">
+      <div className="flex-1 min-h-0 p-8 overflow-y-auto scrollbar-thin">
+        <div className="max-w-none">
           {/* Render HTML content if available, otherwise plain text */}
           {email.body.includes('<') && email.body.includes('>') ? (
-            <div 
-              className="text-gray-900 leading-relaxed"
-              dangerouslySetInnerHTML={{ 
-                __html: email.body.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') 
-              }}
+            <iframe
+              srcDoc={`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta charset="utf-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1">
+                  <style>
+                    body { 
+                      margin: 0;
+                      padding: 16px;
+                      word-wrap: break-word;
+                      overflow-wrap: break-word;
+                    }
+                    img { max-width: 100% !important; height: auto !important; }
+                    table { max-width: 100% !important; }
+                    * { box-sizing: border-box; }
+                  </style>
+                </head>
+                <body>
+                  ${email.body.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')}
+                </body>
+                </html>
+              `}
+              className="w-full min-h-96 border-0"
+              style={{ height: '800px' }}
+              sandbox="allow-same-origin allow-popups"
+              title="Email content"
             />
           ) : (
-            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
+            <div className="text-gray-900 leading-relaxed text-base whitespace-pre-wrap">
               {email.body}
-            </p>
+            </div>
           )}
         </div>
         
