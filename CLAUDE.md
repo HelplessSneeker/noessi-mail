@@ -19,13 +19,19 @@ pnpm db:push                # Update database schema
 **Test Credentials**: `test@example.com` / `password123`
 
 ## Current Status
-✅ **Complete**: Auth (JWT), encryption (AES-256-GCM), email accounts, UI framework, i18n, animations, loading states
-🚧 **Next**: Email composer, OAuth2, IMAP integration, real email fetching
+✅ **Complete**: Auth (JWT), encryption (AES-256-GCM), email accounts, IMAP integration, email sync/parsing, UI framework, i18n, animations, loading states
+🚧 **Next**: Email composer, OAuth2, real-time email updates
 
 ## Key Fixes Applied
 1. **Crypto API**: Use `createCipheriv`/`createDecipheriv` (not `createCipherGCM`)
 2. **Email Form**: Filter empty strings before API submission (NestJS validation)
 3. **JWT Auth**: Include `userId` in strategy return for proper user relations
+
+## IMAP Implementation
+**Architecture**: Connection pooling + email parsing + sync service with TLS/STARTTLS security
+**Dependencies**: `node-imap` + `mailparser` for RFC 2822 compliance
+**Endpoints**: `/imap/test-connection`, `/imap/sync/:id`, `/imap/folders/:id`, `/imap/status/:id`
+**Features**: Incremental sync, email threading, attachment parsing, connection health monitoring
 
 ## UI/UX System
 **Theme**: Noessi Mail blue (`--brand-primary: 217 91% 60%`) with comprehensive HSL variables in `globals.css`
@@ -41,7 +47,8 @@ pnpm db:push                # Update database schema
 ## File Patterns
 - **Components**: `apps/web/src/components/ui/`
 - **Pages**: `apps/web/src/app/*/page.tsx`
-- **API**: `apps/api/src/*/` (auth, email-account, encryption)
+- **API**: `apps/api/src/*/` (auth, email-account, encryption, imap)
+- **IMAP**: `apps/api/src/imap/` (connection, parsing, sync services)
 - **Database**: `packages/database/prisma/schema.prisma`
 - **Types**: `packages/types/index.ts`
 

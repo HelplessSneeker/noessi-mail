@@ -9,6 +9,7 @@ import { EmailAccountModule } from './email-account/email-account.module';
 import { EncryptionModule } from './encryption/encryption.module';
 import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { DemoModule } from './demo/demo.module';
+import { ImapModule } from './imap/imap.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { DemoModule } from './demo/demo.module';
     PrismaModule,
     AuthModule,
     EmailAccountModule,
+    ImapModule,
     DemoModule,
   ],
   providers: [
