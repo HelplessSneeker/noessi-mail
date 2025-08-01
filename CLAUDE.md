@@ -29,6 +29,7 @@ pnpm db:push                # Update database schema
 4. **API Response Structure**: Frontend services extract `result.data` from standardized `{success, data, meta}` API responses
 5. **Authentication Tokens**: Use consistent `accessToken` key in localStorage (not `token`)
 6. **Email Display Chain**: Fixed service layer data extraction enabling full email list rendering
+7. **Sync Progress System**: Unified WebSocket-based real-time progress (replaced polling system) + fixed DTO validation + stable timer updates
 
 ## IMAP Implementation
 **Status**: ✅ **Fully Operational** - Complete email sync and display pipeline working
@@ -97,6 +98,7 @@ Global exception filters provide structured error responses. Demo endpoints at `
 - Empty email lists: Service layer not extracting `data` from API response
 - 401 errors: Token key mismatch (`accessToken` vs `token` in localStorage)
 - Connection errors: Check IMAP credentials and sync status
+- Irregular sync progress: Use WebSocket `/sync/start` (not old polling endpoints), ensure DTO validation with `@IsString()/@IsOptional()` decorators
 
 **IMAP Sync**: Use `/imap/sync/:emailAccountId` endpoint to manually trigger email sync for testing
 

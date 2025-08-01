@@ -11,6 +11,7 @@ import { ResponseInterceptor } from './interceptors/response.interceptor';
 import { DemoModule } from './demo/demo.module';
 import { ImapModule } from './imap/imap.module';
 import { EmailModule } from './email/email.module';
+import { SyncModule } from './sync/sync.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { EmailModule } from './email/email.module';
     EmailAccountModule,
     EmailModule,
     ImapModule,
+    SyncModule,
     DemoModule,
   ],
   providers: [

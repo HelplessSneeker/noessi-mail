@@ -1,4 +1,5 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsEnum } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, IsEnum, IsArray, Min, Max } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export enum ImapSecurity {
   TLS = 'tls',
@@ -90,6 +91,79 @@ export class ImapSyncOptions {
   @IsOptional()
   @IsBoolean()
   fetchAttachments?: boolean = false;
+}
+
+export enum SyncStrategy {
+  PARALLEL = 'parallel',
+  SEQUENTIAL = 'sequential',
+}
+
+export class EnhancedImapSyncOptions {
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  folders?: string[]; // Auto-detect if empty
+
+  @IsOptional()
+  @IsBoolean()
+  includeSpam?: boolean = true;
+
+  @IsOptional()
+  @IsBoolean()
+  includeInbox?: boolean = true;
+
+  @IsOptional()
+  @Transform(({ value }) => value === null ? null : parseInt(value))
+  @IsNumber()
+  @Min(1)
+  limit?: number | null = null; // null = unlimited
+
+  @IsOptional()
+  @IsEnum(SyncStrategy)
+  strategy?: SyncStrategy = SyncStrategy.PARALLEL;
+
+  @IsOptional()
+  @IsBoolean()
+  continueOnError?: boolean = true;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(10)
+  maxConcurrency?: number = 3;
+
+  @IsOptional()
+  @IsBoolean()
+  fetchBody?: boolean = true;
+
+  @IsOptional()
+  @IsBoolean()
+  fetchAttachments?: boolean = false;
+
+  @IsOptional()
+  @IsNumber()
+  sinceUid?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  markSeen?: boolean = false;
+}
+
+export interface MultiSyncResult {
+  totalFolders: number;
+  syncedFolders: string[];
+  failedFolders: { folder: string; error: string }[];
+  totalMessages: number;
+  syncedMessages: number;
+  errors: string[];
+  duration: number;
+  folderResults: {
+    [folderName: string]: {
+      syncedCount: number;
+      totalMessages: number;
+      errors: string[];
+    };
+  };
 }
 
 export class TestConnectionDto {

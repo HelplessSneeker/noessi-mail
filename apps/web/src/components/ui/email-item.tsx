@@ -47,6 +47,35 @@ export function EmailItem({ email, isSelected, onClick }: EmailItemProps) {
     return text.substring(0, maxLength) + '...';
   };
 
+  const getFolderLabel = (email: Email) => {
+    // Only show folder label if it's different from the standard folders or if we have the original folder name
+    if (email.folderName && email.folderName !== 'INBOX') {
+      // Show original folder name for non-standard folders
+      return email.folderName;
+    }
+    
+    // For spam folders, always show the label
+    if (email.folder === 'spam') {
+      return 'Spam';
+    }
+    
+    return null;
+  };
+
+  const getFolderLabelColor = (folder: string) => {
+    const folderLower = folder.toLowerCase();
+    if (folderLower.includes('spam') || folderLower.includes('junk')) {
+      return 'bg-red-100 text-red-700 border-red-200';
+    }
+    if (folderLower.includes('sent')) {
+      return 'bg-green-100 text-green-700 border-green-200';
+    }
+    if (folderLower.includes('draft')) {
+      return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+    }
+    return 'bg-gray-100 text-gray-600 border-gray-200';
+  };
+
   return (
     <div
       className={cn(
@@ -92,12 +121,22 @@ export function EmailItem({ email, isSelected, onClick }: EmailItemProps) {
           
           {/* Subject */}
           <div className="mb-2">
-            <span className={cn(
-              "text-sm block truncate transition-colors duration-200 leading-relaxed",
-              !email.isRead ? "font-semibold text-gray-900" : "font-medium text-gray-700"
-            )}>
-              {email.subject}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "text-sm block truncate transition-colors duration-200 leading-relaxed flex-1",
+                !email.isRead ? "font-semibold text-gray-900" : "font-medium text-gray-700"
+              )}>
+                {email.subject}
+              </span>
+              {getFolderLabel(email) && (
+                <span className={cn(
+                  "text-xs px-2 py-1 rounded border text-nowrap transition-all duration-200 hover:scale-105",
+                  getFolderLabelColor(getFolderLabel(email)!)
+                )}>
+                  {getFolderLabel(email)}
+                </span>
+              )}
+            </div>
           </div>
           
           {/* Preview */}

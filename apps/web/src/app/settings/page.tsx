@@ -6,9 +6,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { authService } from '@/services/auth.service';
 import { emailAccountService } from '@/services/email-account.service';
+import { emailService } from '@/services/email.service';
 import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/ui/navbar';
-import { ArrowLeft, Plus, Trash2, Settings as SettingsIcon } from 'lucide-react';
+import SyncProgress from '@/components/ui/sync-progress';
+import { ArrowLeft, Plus, Trash2, Settings as SettingsIcon, RefreshCw, Zap, TestTube2, AlertCircle, CheckCircle, Edit3 } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -28,8 +30,61 @@ export default function SettingsPage() {
     password: ''
   });
   const [isAddingAccount, setIsAddingAccount] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const [accountStats, setAccountStats] = useState<{[key: string]: any}>({});
+  const [testingConnection, setTestingConnection] = useState<{[key: string]: boolean}>({});
+  const [syncingAccounts, setSyncingAccounts] = useState<{[key: string]: boolean}>({});
+  const [showSyncProgress, setShowSyncProgress] = useState<{[key: string]: boolean}>({});
+  const [currentSyncAccount, setCurrentSyncAccount] = useState<string | null>(null);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; show: boolean }>({ message: '', type: 'info', show: false });
+  const [confirmModal, setConfirmModal] = useState<{ 
+    show: boolean; 
+    title: string; 
+    message: string; 
+    type: 'warning' | 'danger'; 
+    onConfirm: () => void; 
+    confirmText?: string;
+    cancelText?: string;
+  }>({ 
+    show: false, 
+    title: '', 
+    message: '', 
+    type: 'warning', 
+    onConfirm: () => {},
+    confirmText: 'Confirm',
+    cancelText: 'Cancel'
+  });
   const queryClient = useQueryClient();
+
+  // Toast notification function
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ message, type, show: true });
+    setTimeout(() => {
+      setToast(prev => ({ ...prev, show: false }));
+    }, 4000);
+  };
+
+  // Confirmation modal function
+  const showConfirmModal = (
+    title: string, 
+    message: string, 
+    onConfirm: () => void, 
+    type: 'warning' | 'danger' = 'warning',
+    confirmText: string = 'Confirm',
+    cancelText: string = 'Cancel'
+  ) => {
+    setConfirmModal({
+      show: true,
+      title,
+      message,
+      type,
+      onConfirm,
+      confirmText,
+      cancelText
+    });
+  };
 
   // Provider configurations - determines the authentication flow and required fields
   // Gmail/Outlook: OAuth2 flow (redirects to provider for authorization)
@@ -93,6 +148,7 @@ export default function SettingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['emailAccounts'] });
       setIsAddingAccount(false);
+      setPasswordFocused(false);
       setFormData({ 
         email: '', 
         provider: 'gmail',
@@ -114,6 +170,46 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['emailAccounts'] });
     },
   });
+
+  const updateAccountMutation = useMutation({
+    mutationFn: ({ accountId, updateData }: { accountId: string; updateData: any }) => 
+      emailService.updateEmailAccount(accountId, updateData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emailAccounts'] });
+      setEditingAccount(null);
+      setPasswordFocused(false);
+      setFormData({ 
+        email: '', 
+        provider: 'gmail',
+        imapHost: '',
+        imapPort: 993,
+        imapSecurity: 'tls',
+        smtpHost: '',
+        smtpPort: 587,
+        smtpSecurity: 'starttls',
+        password: ''
+      });
+      setFormErrors({});
+    },
+  });
+
+  const loadAccountStats = async (accountId: string) => {
+    try {
+      const stats = await emailService.getEmailAccountStats(accountId);
+      setAccountStats(prev => ({ ...prev, [accountId]: stats }));
+    } catch (error) {
+      console.error('Failed to load account stats:', error);
+    }
+  };
+
+  // Load stats for all accounts
+  useEffect(() => {
+    if (emailAccounts && emailAccounts.length > 0) {
+      emailAccounts.forEach(account => {
+        loadAccountStats(account.id);
+      });
+    }
+  }, [emailAccounts]);
 
   if (!isMounted || isLoading) {
     return (
@@ -150,13 +246,16 @@ export default function SettingsPage() {
       if (!formData.smtpPort || formData.smtpPort < 1 || formData.smtpPort > 65535) {
         errors.smtpPort = t('smtpPortInvalid');
       }
-      if (!formData.password.trim()) {
+      if (!formData.password.trim() && !editingAccount) {
         errors.password = t('passwordRequired');
       }
     }
     
-    // Check if email already exists
-    if (emailAccounts.some(account => account.email.toLowerCase() === formData.email.toLowerCase())) {
+    // Check if email already exists (exclude current account when editing)
+    if (emailAccounts.some(account => 
+      account.email.toLowerCase() === formData.email.toLowerCase() && 
+      account.id !== editingAccount
+    )) {
       errors.email = t('emailAlreadyExists');
     }
     
@@ -166,6 +265,11 @@ export default function SettingsPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingAccount) {
+      handleUpdateAccount(e);
+      return;
+    }
+
     if (validateForm()) {
       // Clean form data by removing empty strings for optional fields
       const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
@@ -262,12 +366,169 @@ export default function SettingsPage() {
     // TODO: Implement OAuth2 flow
     // This would redirect to provider's OAuth2 authorization URL
     console.log(`Starting OAuth2 flow for ${provider}`);
-    alert(`OAuth2 connection for ${provider} is not yet implemented. This would normally redirect to ${provider}'s authorization page.`);
+    showToast(`OAuth2 connection for ${provider} is not yet implemented. This would normally redirect to ${provider}'s authorization page.`, 'info');
   };
 
   const handleDeleteAccount = (accountId: string) => {
-    if (confirm(t('confirmDelete'))) {
-      deleteAccountMutation.mutate(accountId);
+    const account = emailAccounts.find(acc => acc.id === accountId);
+    showConfirmModal(
+      'Delete Email Account',
+      `Are you sure you want to delete the email account "${account?.email}"? This action cannot be undone and will remove all associated emails.`,
+      () => {
+        deleteAccountMutation.mutate(accountId);
+        setConfirmModal(prev => ({ ...prev, show: false }));
+      },
+      'danger',
+      'Delete Account',
+      'Cancel'
+    );
+  };
+
+  const handleTestConnection = async (accountId: string) => {
+    setTestingConnection(prev => ({ ...prev, [accountId]: true }));
+    try {
+      const result = await emailService.testEmailAccountConnection(accountId);
+      if (result.success) {
+        showToast('Connection successful!', 'success');
+      } else {
+        showToast(`Connection failed: ${result.message}`, 'error');
+      }
+    } catch (error: any) {
+      showToast(`Connection test failed: ${error.message}`, 'error');
+    } finally {
+      setTestingConnection(prev => ({ ...prev, [accountId]: false }));
+    }
+  };
+
+  const handleFullResync = (accountId: string) => {
+    const account = emailAccounts.find(acc => acc.id === accountId);
+    showConfirmModal(
+      'Full Re-sync',
+      `This will sync ALL emails from ALL folders (including spam) for "${account?.email}". This may sync 1000+ emails. Continue?`,
+      async () => {
+        setConfirmModal(prev => ({ ...prev, show: false }));
+        setSyncingAccounts(prev => ({ ...prev, [accountId]: true }));
+        setCurrentSyncAccount(accountId);
+        setShowSyncProgress(prev => ({ ...prev, [accountId]: true }));
+        
+        try {
+          // Use the new WebSocket-based sync endpoint
+          const token = localStorage.getItem('accessToken');
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/sync/start`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              emailAccountId: accountId,
+              clearExisting: false, // Don't clear for full resync
+              includeSpam: true,
+              batchSize: 50,
+            }),
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            showToast(`Full re-sync started with session ${result.data.sessionId}! Real-time progress available.`, 'success');
+            queryClient.invalidateQueries({ queryKey: ['emails'] });
+          } else {
+            throw new Error(`Failed to start sync: ${response.statusText}`);
+          }
+        } catch (error: any) {
+          showToast(`Full re-sync failed: ${error.message}`, 'error');
+          setShowSyncProgress(prev => ({ ...prev, [accountId]: false }));
+        } finally {
+          setSyncingAccounts(prev => ({ ...prev, [accountId]: false }));
+        }
+      },
+      'warning',
+      'Start Full Re-sync',
+      'Cancel'
+    );
+  };
+
+  const handleClearAndResync = (accountId: string) => {
+    const account = emailAccounts.find(acc => acc.id === accountId);
+    showConfirmModal(
+      'Clear and Re-sync',
+      `⚠️ This will DELETE ALL existing emails for "${account?.email}" and sync ALL emails fresh from server. This action cannot be undone. Continue?`,
+      async () => {
+        setConfirmModal(prev => ({ ...prev, show: false }));
+        setSyncingAccounts(prev => ({ ...prev, [accountId]: true }));
+        setCurrentSyncAccount(accountId);
+        setShowSyncProgress(prev => ({ ...prev, [accountId]: true }));
+        
+        try {
+          // Use the new WebSocket-based sync endpoint with clear existing
+          const token = localStorage.getItem('accessToken');
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/sync/start`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              emailAccountId: accountId,
+              clearExisting: true, // Clear for fresh sync
+              includeSpam: true,
+              batchSize: 50,
+            }),
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            showToast(`Clear and re-sync started with session ${result.data.sessionId}! Existing emails cleared, syncing fresh.`, 'success');
+            queryClient.invalidateQueries({ queryKey: ['emails'] });
+          } else {
+            throw new Error(`Failed to start sync: ${response.statusText}`);
+          }
+        } catch (error: any) {
+          showToast(`Clear and re-sync failed: ${error.message}`, 'error');
+          setShowSyncProgress(prev => ({ ...prev, [accountId]: false }));
+        } finally {
+          setSyncingAccounts(prev => ({ ...prev, [accountId]: false }));
+        }
+      },
+      'danger',
+      'Delete & Re-sync',
+      'Cancel'
+    );
+  };
+
+  const handleEditAccount = (account: any) => {
+    setEditingAccount(account.id);
+    setPasswordFocused(false);
+    setFormData({
+      email: account.email,
+      provider: account.provider,
+      imapHost: account.imapHost || '',
+      imapPort: account.imapPort || 993,
+      imapSecurity: account.imapSecurity || 'tls',
+      smtpHost: account.smtpHost || '',
+      smtpPort: account.smtpPort || 587,
+      smtpSecurity: account.smtpSecurity || 'starttls',
+      password: '' // Don't show existing password
+    });
+  };
+
+  const handleUpdateAccount = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateForm() && editingAccount) {
+      // Clean form data by removing empty strings for optional fields
+      const cleanedData = Object.entries(formData).reduce((acc, [key, value]) => {
+        // Always include required fields (email, provider)
+        if (key === 'email' || key === 'provider') {
+          acc[key] = value;
+        }
+        // For optional fields, only include if they have non-empty values
+        else if (value !== '' && value !== null && value !== undefined) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as any);
+
+      updateAccountMutation.mutate({ accountId: editingAccount, updateData: cleanedData });
     }
   };
 
@@ -332,8 +593,8 @@ export default function SettingsPage() {
               </div>
 
           <div className="divide-y divide-gray-200">
-              {/* Add Account Form */}
-              {isAddingAccount && (
+              {/* Add/Edit Account Form */}
+              {(isAddingAccount || editingAccount) && (
                 <div className="px-4 sm:px-6 py-4 bg-gray-50">
                   <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                   {/* Provider Selection */}
@@ -537,7 +798,13 @@ export default function SettingsPage() {
                           name="password"
                           value={formData.password}
                           onChange={handleInputChange}
-                          placeholder={t('passwordPlaceholder')}
+                          onFocus={() => setPasswordFocused(true)}
+                          onBlur={() => setPasswordFocused(false)}
+                          placeholder={
+                            editingAccount && !passwordFocused && formData.password === '' 
+                              ? '••••••••••••••••' 
+                              : t('passwordPlaceholder')
+                          }
                           className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
                             formErrors.password ? 'border-red-300' : 'border-gray-300'
                           }`}
@@ -566,9 +833,14 @@ export default function SettingsPage() {
                     ) : (
                       <Button
                         type="submit"
-                        disabled={addAccountMutation.isPending}
+                        disabled={addAccountMutation.isPending || updateAccountMutation.isPending}
                       >
-                        {addAccountMutation.isPending ? tCommon('loading') : t('testAndSave')}
+                        {(addAccountMutation.isPending || updateAccountMutation.isPending) 
+                          ? tCommon('loading') 
+                          : editingAccount 
+                            ? 'Update & Test Connection' 
+                            : t('testAndSave')
+                        }
                       </Button>
                     )}
                     <Button
@@ -576,6 +848,8 @@ export default function SettingsPage() {
                       variant="outline"
                       onClick={() => {
                         setIsAddingAccount(false);
+                        setEditingAccount(null);
+                        setPasswordFocused(false);
                         setFormData({ 
                           email: '', 
                           provider: 'gmail',
@@ -598,7 +872,7 @@ export default function SettingsPage() {
             )}
 
               {/* Email Accounts List */}
-              {emailAccounts.length === 0 && !isAddingAccount ? (
+              {emailAccounts.length === 0 && !isAddingAccount && !editingAccount ? (
                 <div className="px-4 sm:px-6 py-8 text-center">
                   <div className="w-12 h-12 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4 hover:bg-blue-200 transition-colors">
                     <SettingsIcon className="h-6 w-6 text-blue-600" />
@@ -607,39 +881,163 @@ export default function SettingsPage() {
                   <p className="text-sm text-gray-500">{t('addFirstAccount')}</p>
                 </div>
               ) : (
-                emailAccounts.map((account) => (
-                  <div key={account.id} className="px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 sm:space-x-4">
-                        <div className="flex-shrink-0">
-                          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors">
-                            <span className="text-sm font-medium text-blue-600">
-                              {account.email.charAt(0).toUpperCase()}
+                emailAccounts.map((account) => {
+                  const stats = accountStats[account.id];
+                  const isTestingConn = testingConnection[account.id];
+                  const isSyncing = syncingAccounts[account.id];
+                  
+                  return (
+                    <div key={account.id} className="px-4 sm:px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="space-y-3">
+                        {/* Account Header */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3 sm:space-x-4">
+                            <div className="flex-shrink-0">
+                              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors">
+                                <span className="text-sm font-medium text-blue-600">
+                                  {account.email.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-medium text-gray-900">{account.email}</h3>
+                              <p className="text-xs sm:text-sm text-gray-500 capitalize">
+                                {account.provider}
+                                {account.imapHost && ` • ${account.imapHost}`}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Connected
                             </span>
                           </div>
                         </div>
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-900">{account.email}</h3>
-                          <p className="text-xs sm:text-sm text-gray-500 capitalize">{account.provider}</p>
+
+                        {/* Email Stats */}
+                        {stats && (
+                          <div className="bg-gray-50 rounded-lg p-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+                            <div>
+                              <div className="text-lg font-semibold text-blue-600">{stats.totalEmails}</div>
+                              <div className="text-xs text-gray-500">Total Emails</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold text-orange-600">{stats.unreadEmails}</div>
+                              <div className="text-xs text-gray-500">Unread</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold text-yellow-600">{stats.starredEmails}</div>
+                              <div className="text-xs text-gray-500">Starred</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold text-purple-600">
+                                {Object.keys(stats.folderStats || {}).length}
+                              </div>
+                              <div className="text-xs text-gray-500">Folders</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Folder Stats */}
+                        {stats?.folderStats && Object.keys(stats.folderStats).length > 0 && (
+                          <div className="text-xs text-gray-600">
+                            <span className="font-medium">Folders: </span>
+                            {Object.entries(stats.folderStats).map(([folder, folderData]: [string, any]) => (
+                              <span key={folder} className="inline-block mr-3 mb-1">
+                                <span className="font-medium">{folder}</span>
+                                <span className="text-gray-500"> ({folderData.total} emails)</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          {/* Test Connection */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleTestConnection(account.id)}
+                            disabled={isTestingConn || isSyncing}
+                            className="flex items-center text-xs"
+                          >
+                            {isTestingConn ? (
+                              <>
+                                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                                Testing...
+                              </>
+                            ) : (
+                              <>
+                                <TestTube2 className="h-3 w-3 mr-1" />
+                                Test Connection
+                              </>
+                            )}
+                          </Button>
+
+                          {/* Full Re-sync */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleFullResync(account.id)}
+                            disabled={isSyncing || isTestingConn}
+                            className="flex items-center text-xs text-blue-600 hover:text-blue-700 border-blue-200 hover:bg-blue-50"
+                          >
+                            {isSyncing ? (
+                              <>
+                                <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                                Syncing...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                                Full Re-sync
+                              </>
+                            )}
+                          </Button>
+
+                          {/* Clear and Re-sync */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleClearAndResync(account.id)}
+                            disabled={isSyncing || isTestingConn}
+                            className="flex items-center text-xs text-orange-600 hover:text-orange-700 border-orange-200 hover:bg-orange-50"
+                          >
+                            <Zap className="h-3 w-3 mr-1" />
+                            Clear & Re-sync
+                          </Button>
+
+                          {/* Edit Account */}
+                          {account.provider === 'imap' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditAccount(account)}
+                              disabled={editingAccount === account.id || isSyncing || isTestingConn}
+                              className="flex items-center text-xs"
+                            >
+                              <Edit3 className="h-3 w-3 mr-1" />
+                              Edit Settings
+                            </Button>
+                          )}
+
+                          {/* Delete Account */}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteAccount(account.id)}
+                            disabled={deleteAccountMutation.isPending || isSyncing || isTestingConn}
+                            className="flex items-center text-xs text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors ml-auto"
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Delete
+                          </Button>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          {t('connected')}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteAccount(account.id)}
-                          disabled={deleteAccountMutation.isPending}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
           </div>
             </div>
@@ -648,6 +1046,144 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border max-w-sm transition-all duration-300 transform ${
+          toast.show ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'
+        } ${
+          toast.type === 'success' 
+            ? 'bg-green-50 border-green-200 text-green-800' 
+            : toast.type === 'error' 
+            ? 'bg-red-50 border-red-200 text-red-800'
+            : 'bg-blue-50 border-blue-200 text-blue-800'
+        }`}>
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              {toast.type === 'success' && (
+                <CheckCircle className="h-5 w-5 text-green-400" />
+              )}
+              {toast.type === 'error' && (
+                <AlertCircle className="h-5 w-5 text-red-400" />
+              )}
+              {toast.type === 'info' && (
+                <AlertCircle className="h-5 w-5 text-blue-400" />
+              )}
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-medium">{toast.message}</p>
+            </div>
+            <div className="ml-4 flex-shrink-0">
+              <button
+                onClick={() => setToast(prev => ({ ...prev, show: false }))}
+                className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600"
+              >
+                <span className="sr-only">Close</span>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmModal.show && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            {/* Background overlay */}
+            <div 
+              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+              onClick={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+            ></div>
+
+            {/* Center the modal */}
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            {/* Modal panel */}
+            <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+              <div className="sm:flex sm:items-start">
+                <div className={`mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10 ${
+                  confirmModal.type === 'danger' 
+                    ? 'bg-red-100' 
+                    : 'bg-yellow-100'
+                }`}>
+                  {confirmModal.type === 'danger' ? (
+                    <AlertCircle className="h-6 w-6 text-red-600" />
+                  ) : (
+                    <AlertCircle className="h-6 w-6 text-yellow-600" />
+                  )}
+                </div>
+                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                    {confirmModal.title}
+                  </h3>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500">
+                      {confirmModal.message}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm ${
+                    confirmModal.type === 'danger'
+                      ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+                      : 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'
+                  }`}
+                  onClick={confirmModal.onConfirm}
+                >
+                  {confirmModal.confirmText}
+                </button>
+                <button
+                  type="button"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm"
+                  onClick={() => setConfirmModal(prev => ({ ...prev, show: false }))}
+                >
+                  {confirmModal.cancelText}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sync Progress Modal */}
+      {currentSyncAccount && showSyncProgress[currentSyncAccount] && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Email Sync Progress</h3>
+              <button
+                onClick={() => {
+                  setShowSyncProgress(prev => ({ ...prev, [currentSyncAccount]: false }));
+                  setCurrentSyncAccount(null);
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <SyncProgress
+              emailAccountId={currentSyncAccount}
+              onComplete={() => {
+                setShowSyncProgress(prev => ({ ...prev, [currentSyncAccount]: false }));
+                setCurrentSyncAccount(null);
+                queryClient.invalidateQueries({ queryKey: ['emails'] });
+                showToast('Email sync completed successfully!', 'success');
+              }}
+              onError={(error) => {
+                setShowSyncProgress(prev => ({ ...prev, [currentSyncAccount]: false }));
+                setCurrentSyncAccount(null);
+                showToast(`Sync failed: ${error.message || error}`, 'error');
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
